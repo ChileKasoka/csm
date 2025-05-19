@@ -9,14 +9,22 @@
       <nav class="nav-links">
         <router-link to="/dashboard">🏠 Dashboard</router-link>
 
-        <details>
-          <summary>📚 Resources</summary>
-          <div class="submenu">
-            <router-link to="/team">👥 Team</router-link>
-            <router-link to="/tasks">📝 Tasks</router-link>
-            <router-link to="/roles">🔐 Roles</router-link>
-          </div>
-        </details>
+<details>
+  <summary>📚 Resources</summary>
+  <div class="submenu">
+    <router-link to="/team">👥 Team</router-link>
+    <router-link to="/tasks">📝 Tasks</router-link>
+    <details>
+      <summary>🔐 Roles</summary>
+      <div class="submenu">
+        <router-link to="/roles">List Roles</router-link>
+        <router-link to="/assign">Permisisons</router-link>
+        <router-link to="/role-permissions">Role Permisisons</router-link>
+      </div>
+    </details>
+  </div>
+</details>
+
 
         <router-link to="/settings">⚙️ Settings</router-link>
       </nav>

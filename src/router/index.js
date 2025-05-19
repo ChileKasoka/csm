@@ -9,6 +9,8 @@ import TasksPage from '@/pages/TasksPage.vue'
 import RolesPage from '@/pages/RolesPage.vue'
 import SettingsPage from '@/pages/SettingsPage.vue'
 import ProjectsPage from '@/pages/ProjectsPage.vue'
+import AssignmentPermissions from '@/pages/AssignmentPermissions.vue'
+import RolePermissionsPage from '@/pages/RolePermissions.vue'
 
 const routes = [
   {
@@ -23,7 +25,21 @@ const routes = [
       { path: 'dashboard', name: 'dashboard', component: DashboardPage },
       { path: 'team', name: 'team', component: TeamPage },
       { path: 'tasks', name: 'tasks', component: TasksPage },
-      { path: 'roles', name: 'roles', component: RolesPage },
+      {
+        name: 'roles',
+        path: '/roles',
+        component: RolesPage,
+      },
+      {
+        name: 'assignRoles',
+        path: '/assign',
+        component: AssignmentPermissions,
+      },
+      {
+        path: '/role-permissions',
+        name: 'RolePermissions',
+        component: RolePermissionsPage,
+      },
       {path: 'projects', name: 'projects', component: ProjectsPage },
       { path: 'settings', name: 'settings', component: SettingsPage }
     ]
