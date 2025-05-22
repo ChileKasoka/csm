@@ -261,6 +261,7 @@ async addMember() {
   padding: 1rem;
   border-radius: 10px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  cursor: pointer;
 }
 
 .team-card h3 {
