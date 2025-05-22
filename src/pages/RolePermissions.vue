@@ -6,7 +6,7 @@
       v-for="(group, index) in groupedPermissions"
       :key="index"
       class="role-section"
-    >
+    > 
       <h3 class="role-title">{{ group.role_name }}</h3>
 
       <table class="permissions-table">
@@ -15,7 +15,7 @@
             <th>#</th>
             <th>Permission</th>
             <th>Method</th>
-            <th>Path</th>
+            <!-- <th>Path</th> -->
           </tr>
         </thead>
         <tbody>
@@ -25,7 +25,7 @@
             <td>
               <span :class="['method', perm.method.toLowerCase()]">{{ perm.method }}</span>
             </td>
-            <td>{{ perm.path }}</td>
+            <!-- <td>{{ perm.path }}</td> -->
           </tr>
         </tbody>
       </table>

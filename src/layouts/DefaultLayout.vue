@@ -5,19 +5,30 @@
       ☰
     </button> -->
     <aside class="sidebar" :class="{ 'collapsed': !isSidebarOpen }">
-      <h2 class="logo">CSM</h2>
+    <div style="display: flex;">
+      <h2 class="logo">Northern Hire Ltd</h2>
+      <img src="../assets/logo.svg" alt="Logo" style="width: 50px; height: 50px; margin-left: 1rem;" />
+    </div>
+
+    <hr />
+
       <nav class="nav-links">
-        <router-link to="/dashboard">🏠 Dashboard</router-link>
+        <router-link to="/dashboard">📉 Dashboard</router-link>
 
 <details>
-  <summary>📚 Resources</summary>
+  <summary>👷🏿 Resources</summary>
   <div class="submenu">
+    <div></div>
     <router-link to="/team">👥 Team</router-link>
+    <div></div>
+    <router-link to="/projects">🚧 Project</router-link>
+    <div></div>
     <router-link to="/tasks">📝 Tasks</router-link>
     <details>
-      <summary>🔐 Roles</summary>
+      <summary>🔐 Access Control</summary>
       <div class="submenu">
-        <router-link to="/roles">List Roles</router-link>
+        <div></div>
+        <router-link to="/roles">Roles</router-link>
         <router-link to="/assign">Permisisons</router-link>
         <router-link to="/role-permissions">Role Permisisons</router-link>
       </div>
@@ -25,7 +36,7 @@
   </div>
 </details>
 
-
+<div></div>
         <router-link to="/settings">⚙️ Settings</router-link>
       </nav>
     </aside>
@@ -33,12 +44,12 @@
     <main class="main-content">
     <!-- Navbar -->
       <header class="navbar">
-    <!-- Toggle Button -->
-    <button class="toggle-btn" @click="toggleSidebar">
-      ☰
-    </button>
+        <!-- Toggle Button -->
+        <button class="toggle-btn" @click="toggleSidebar">
+          ☰
+        </button>
         <div class="navbar-right">
-          <span class="user-info">Hi, User</span>
+          <span class="user-info">Hi, {{ userName }}</span>
         </div>
       </header>
       <router-view />
@@ -47,13 +58,21 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 
 const isSidebarOpen = ref(true)
+const userName = ref('User')
 
 function toggleSidebar() {
   isSidebarOpen.value = !isSidebarOpen.value
 }
+
+onMounted(() => {
+  const storedName = localStorage.getItem('user')
+  if (storedName) {
+    userName.value = JSON.parse(storedName)
+  }
+})
 </script>
 
 <style scoped>
@@ -67,7 +86,7 @@ function toggleSidebar() {
 
 /* Toggle Button */
 .toggle-btn {
-    color: #fff;
+  color: #fff;
   top: 0.5rem;
   left: 0.5rem;
   background: #1f1f1e;
@@ -79,7 +98,7 @@ function toggleSidebar() {
 }
 
 .toggle-btn:hover {
-  background: #e4e140;
+  background: #ffffff;
   color: #1f1f1e;
 }
 
@@ -105,8 +124,16 @@ function toggleSidebar() {
   font-weight: bold;
   color: #e4e140;
   margin-bottom: 2rem;
-  text-align: center;
+  text-align: left;
+  font-family: "Bodoni Moda"
 }
+
+.sidebar hr {
+  border: none;
+  border-top: 1px solid #ccc; /* light gray line */
+  margin: 1rem 0; /* space above and below */
+}
+
 
 .nav-links {
   display: flex;
@@ -213,7 +240,7 @@ details[open] summary {
 
 .navbar {
   height: 60px;
-  background: #ffffff;
+  background: #e4e140;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   display: flex;
   align-items: center;

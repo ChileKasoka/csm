@@ -1,7 +1,7 @@
 <template>
   <div class="dashboard-overview">
     <header class="header">
-      <h1>Welcome back, User!</h1>
+      <h1>Welcome back, {{userName}}</h1>
       <p>Here is your activity snapshot for today.</p>
     </header>
 
@@ -24,7 +24,20 @@
 
 <script>
 export default {
-  name: 'DashboardPage'
+  name: 'DashboardPage',
+
+  data() {
+    return {
+      userName: ''
+    }
+  },
+
+  mounted() {
+    const storedName = localStorage.getItem('user')
+    if (storedName) {
+      this.userName = JSON.parse(storedName)
+    }
+  }
 }
 </script>
 
