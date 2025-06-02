@@ -15,8 +15,8 @@
         <p class="number">23</p>
       </div>
       <div class="card">
-        <h3>Messages</h3>
-        <p class="number">5</p>
+        <h3>Team Members</h3>
+        <p class="number"> {{ teamCount }} </p>
       </div>
     </section>
   </div>
@@ -28,14 +28,36 @@ export default {
 
   data() {
     return {
-      userName: ''
+      userName: '',
+      teamCount: 0
     }
   },
 
   mounted() {
-    const storedName = localStorage.getItem('user')
+    const storedName = localStorage.getItem('user');
     if (storedName) {
-      this.userName = JSON.parse(storedName)
+      this.userName = JSON.parse(storedName);
+    }
+    this.fetchTeamCount(); // properly scoped now
+  },
+
+  methods: {
+    async fetchTeamCount() {
+      try {
+        const response = await fetch('http://localhost:8080/users/count', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+          }
+        });
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        const data = await response.json();
+        this.teamCount = data;
+        console.log('Team data:', data);
+      } catch (error) {
+        console.error('There has been a problem with your fetch operation:', error);
+      }
     }
   }
 }

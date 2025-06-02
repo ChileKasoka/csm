@@ -1,6 +1,5 @@
 // src/router/index.js
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '@/components/HomeView.vue'
 import LoginPage from '@/pages/LoginPage.vue'
 import DefaultLayout from '@/layouts/DefaultLayout.vue'
 import DashboardPage from '@/pages/DashboardPage.vue'
@@ -13,11 +12,6 @@ import AssignmentPermissions from '@/pages/AssignmentPermissions.vue'
 import RolePermissionsPage from '@/pages/RolePermissions.vue'
 
 const routes = [
-  {
-    path: '/home',
-    name: 'home',
-    component: HomeView
-  },
   {
     path: '/',
     component: DefaultLayout,

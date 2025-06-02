@@ -5,11 +5,40 @@
       <p>Manage your active and archived projects.</p>
     </header>
 
+    <form @submit.prevent="createProject" class="project-form">
+      <input v-model="newProject.name" placeholder="Project Name" required />
+      <input v-model="newProject.description" placeholder="Description" required />
+      <input v-model="newProject.start_date" type="date" required />
+      <input v-model="newProject.end_date" type="date" required />
+      <select v-model="newProject.status" required>
+        <option value="planning">Planning</option>
+        <option value="active">Active</option>
+        <option value="completed">Completed</option>
+      </select>
+      <button type="submit">Create Project</button>
+    </form>
+
     <section class="project-list">
       <div class="project-card" v-for="project in projects" :key="project.id">
         <h3>{{ project.name }}</h3>
         <p>{{ project.description }}</p>
+        <p><strong>Start:</strong> {{ formatDate(project.start_date) }}</p>
+        <p><strong>End:</strong> {{ formatDate(project.end_date) }}</p>
         <span class="status" :class="project.status">{{ project.status }}</span>
+<div class="actions">
+  <div class="icon-group">
+    <font-awesome-icon
+      icon="edit"
+      class="icon edit"
+      @click="editProject(project)"
+    />
+    <font-awesome-icon
+      icon="trash"
+      class="icon delete"
+      @click="deleteProject(project.id)"
+    />
+  </div>
+</div>
       </div>
     </section>
   </div>
@@ -20,12 +49,76 @@ export default {
   name: 'ProjectsPage',
   data() {
     return {
-      projects: [
-        { id: 1, name: 'Construction CRM', description: 'Build out core features for the CRM system.', status: 'active' },
-        { id: 2, name: 'Vendor Portal', description: 'Frontend for vendor appointment scheduling.', status: 'on-hold' },
-        { id: 3, name: 'Admin Redesign', description: 'Revamp the admin dashboard UI/UX.', status: 'completed' }
-      ]
+      projects: [],
+      newProject: {
+        name: '',
+        description: '',
+        start_date: '',
+        end_date: '',
+        status: 'planning'
+      }
     };
+  },
+  mounted() {
+    this.fetchProjects();
+  },
+  methods: {
+    async fetchProjects() {
+      const res = await fetch('http://localhost:8080/projects');
+      this.projects = await res.json();
+    },
+async createProject() {
+  const formattedProject = {
+    ...this.newProject,
+    start_date: new Date(this.newProject.start_date + 'T00:00:00Z').toISOString(),
+    end_date: new Date(this.newProject.end_date + 'T00:00:00Z').toISOString()
+  };
+
+  await fetch('http://localhost:8080/projects', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(formattedProject)
+  });
+
+  this.newProject = {
+    name: '',
+    description: '',
+    start_date: '',
+    end_date: '',
+    status: 'planning'
+  };
+
+  this.fetchProjects();
+}
+
+,
+formatDate(dateStr) {
+  if (!dateStr || dateStr.startsWith('0001')) return '—';
+  const date = new Date(dateStr);
+  return isNaN(date)
+    ? '—'
+    : new Intl.DateTimeFormat('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      }).format(date);
+},
+
+  async deleteProject(id) {
+    if (confirm('Are you sure you want to delete this project?')) {
+      await fetch(`http://localhost:8080/projects/${id}`, {
+        method: 'DELETE'
+      });
+      this.fetchProjects();
+    }
+  },
+  editProject(project) {
+    this.newProject = { ...project };
+    // Format for input[type="date"]
+    this.newProject.start_date = project.start_date.split('T')[0];
+    this.newProject.end_date = project.end_date.split('T')[0];
+  }
+
   }
 };
 </script>
@@ -46,11 +139,65 @@ export default {
   color: #6b7280;
 }
 
+.project-form {
+  margin: 1rem 0 2rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.project-form input,
+.project-form select {
+  padding: 0.5rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+}
+
+.project-form button {
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end; /* Push icons to the right */
+  margin-top: 8px;
+}
+
+.icon-group {
+  display: flex;
+  gap: 12px;
+}
+
+.icon {
+  font-size: 1.25rem; /* ~20px */
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  opacity: 0.9;
+}
+
+.icon:hover {
+  transform: scale(1.15);
+  opacity: 1;
+}
+
+.icon.edit {
+  color: #daea33; /* Tailwind blue-500 */
+}
+
+.icon.delete {
+  color: #000000; /* Tailwind red-500 */
+}
+
 .project-list {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 1.5rem;
-  margin-top: 2rem;
 }
 
 .project-card {
@@ -68,7 +215,7 @@ export default {
 .project-card p {
   font-size: 0.95rem;
   color: #4b5563;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
 }
 
 .status {
@@ -84,7 +231,8 @@ export default {
   color: #047857;
 }
 
-.status.on-hold {
+.status.on-hold,
+.status.planning {
   background-color: #fef3c7;
   color: #b45309;
 }

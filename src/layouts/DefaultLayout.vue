@@ -21,9 +21,9 @@
     <div></div>
     <router-link to="/team">👥 Team</router-link>
     <div></div>
-    <router-link to="/projects">🚧 Project</router-link>
+    <router-link to="/projects">🚧 Projects</router-link>
     <div></div>
-    <router-link to="/tasks">📝 Tasks</router-link>
+    <router-link to="/tasks">📝 Assignments</router-link>
     <details>
       <summary>🔐 Access Control</summary>
       <div class="submenu">

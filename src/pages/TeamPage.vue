@@ -29,6 +29,20 @@
         <h3>{{ member.name }}</h3>
         <p>{{ member.email }}</p>
         <span class="role">{{ member.role }}</span>
+      <div class="actions">
+        <div class="icon-group">
+          <font-awesome-icon
+            icon="edit"
+            class="icon edit"
+            @click="openEditModal(member)"
+          />
+          <font-awesome-icon
+            icon="trash"
+            class="icon delete"
+            @click="deleteMember(member.id)"
+          />
+        </div>
+      </div>
       </div>
     </section>
         <!-- Edit Modal -->
@@ -51,6 +65,7 @@
 </template>
 
 <script>
+
 export default {
   name: 'TeamPage',
   data() {
@@ -67,10 +82,17 @@ export default {
     };
   },
   methods: {
-    async fetchRoles() {
+async fetchRoles() {
   try {
-    const response = await fetch('http://localhost:8080/roles');
+    const token = localStorage.getItem('access_token');
+    const response = await fetch('http://localhost:8080/roles', {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
     if (!response.ok) throw new Error('Failed to fetch roles');
+
     const data = await response.json();
     this.roles = data;
   } catch (error) {
@@ -124,22 +146,28 @@ async addMember() {
       console.log('Opening modal for user:', user); // ← Add this
       this.selectedUser = { ...user }; // clone to avoid direct mutation
     },
-    async fetchTeam() {
-      try {
-        const response = await fetch('http://localhost:8080/users');
-        if (!response.ok) throw new Error('Failed to fetch users');
-        const data = await response.json();
-        this.team = data.map(user => ({
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          role: user.role?.name || 'N/A',
-          role_id: user.role?.id || null 
-        }));
-      } catch (error) {
-        console.error('Error loading team:', error);
-      }
-    },
+async fetchTeam() {
+  try {
+    const token = localStorage.getItem('access_token');
+    const response = await fetch('http://localhost:8080/users', {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+    if (!response.ok) throw new Error('Failed to fetch users');
+    const data = await response.json();
+    this.team = data.map(user => ({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role?.name || 'N/A',
+      role_id: user.role?.id || null
+    }));
+  } catch (error) {
+    console.error('Error loading team:', error);
+  }
+},
+
     async updateUser() {
   try {
     const response = await fetch(`http://localhost:8080/users/${this.selectedUser.id}`, {
@@ -173,7 +201,52 @@ async addMember() {
     alert('Error updating user: ' + error.message);
     console.error(error);
   }
-}
+},
+
+async deleteMember(userId) {
+  if (!confirm('Are you sure you want to delete this user?')) return;
+
+  try {
+    const token = localStorage.getItem('access_token');
+    const response = await fetch(`http://localhost:8080/users/${userId}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    if (!response.ok) throw new Error('Failed to delete user');
+
+    this.team = this.team.filter(member => member.id !== userId);
+  } catch (error) {
+    alert('Error deleting user: ' + error.message);
+    console.error(error);
+  }
+},
+
+async getUserById(userId) {
+  try {
+    const token = localStorage.getItem('access_token');
+    const response = await fetch(`http://localhost:8080/users/${userId}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    if (!response.ok) throw new Error('Failed to fetch user');
+    const user = await response.json();
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role?.name || 'N/A',
+      role_id: user.role?.id || null
+    };
+  } catch (error) {
+    console.error('Error fetching user:', error);
+    return null;
+  }
+},
+
 
   },
   mounted() {
@@ -274,6 +347,38 @@ async addMember() {
   margin: 0;
 }
 
+.actions {
+  display: flex;
+  justify-content: flex-end; /* Push icons to the right */
+  margin-top: 8px;
+}
+
+.icon-group {
+  display: flex;
+  gap: 12px;
+}
+
+.icon {
+  font-size: 1.25rem; /* ~20px */
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  opacity: 0.9;
+}
+
+.icon:hover {
+  transform: scale(1.15);
+  opacity: 1;
+}
+
+.icon.edit {
+  color: #daea33; /* Tailwind blue-500 */
+}
+
+.icon.delete {
+  color: #000000; /* Tailwind red-500 */
+}
+
+
 .role {
   display: inline-block;
   margin-top: 0.5rem;
@@ -284,42 +389,108 @@ async addMember() {
   font-weight: bold;
 }
 
-/*Modal */
 .modal {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.5); /* dim background */
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  backdrop-filter: blur(2px);
 }
 
 .modal-content {
-  background: #ffffff;
+  background: #fff;
   padding: 2rem;
-  border-radius: 10px;
-  width: 400px;
-  max-width: 90%;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.modal-content h2 {
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+  color: #1f2937;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  font-size: 0.875rem;
+  color: #4b5563;
+  margin-bottom: 0.25rem;
+}
+
+input,
+select {
+  padding: 0.6rem;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+input:focus,
+select:focus {
+  border-color: #6366f1;
 }
 
 .modal-actions {
   display: flex;
   justify-content: flex-end;
   gap: 1rem;
-  margin-top: 1.5rem;
+  margin-top: 2rem;
+}
+
+.submit-btn {
+
+  color: white;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease-in-out;
+}
+
+.submit-btn:hover {
+  background-color: #b4b43a;
 }
 
 .cancel-btn {
-  background-color: black;
-  color: white;
-  border: none;
-  padding: 0.6rem 1rem;
+  background-color: transparent;
+  color: #374151;
+  border: 1px solid #d1d5db;
+  padding: 0.6rem 1.2rem;
   border-radius: 6px;
-  font-weight: bold;
+  font-weight: 500;
   cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.cancel-btn:hover {
+  background-color: #f3f4f6;
 }
 </style>
