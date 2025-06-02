@@ -16,6 +16,7 @@
       autocomplete="current-password"
     />
     <button type="submit" class="submit-btn" :disabled="loading">
+      <span v-if="loading" class="spinner"></span>
       {{ loading ? "Logging in..." : "Login" }}
     </button>
     <p v-if="errorMessage" class="error-msg">{{ errorMessage }}</p>
@@ -38,6 +39,8 @@ export default {
       this.loading = true;
 
       try {
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+
         const response = await fetch("http://localhost:8080/login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -79,6 +82,7 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  background-color: rgb(230, 230, 230);
 }
 .login-form input,
 .login-form button {
@@ -101,4 +105,23 @@ export default {
   color: red;
   text-align: center;
 }
+
+.spinner {
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  border-left-color: #282828;
+  border-radius: 50%;
+  width: 1rem;
+  height: 1rem;
+  display: inline-block;
+  margin-right: 0.5rem;
+  animation: spin 1s linear infinite;
+  vertical-align: middle;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 </style>

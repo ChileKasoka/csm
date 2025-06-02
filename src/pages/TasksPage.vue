@@ -9,12 +9,15 @@
     <form @submit.prevent="saveTask" class="task-form">
       <input v-model="newTask.title" placeholder="Title" required />
       <input v-model="newTask.description" placeholder="Description" required />
+      <input type="date" v-model="newTask.start_date" placeholder="Start Date" />
+      <input type="date" v-model="newTask.end_date" placeholder="End Date" />
       <select v-model="newTask.status" required>
         <option value="pending">Pending</option>
         <option value="in-progress">In Progress</option>
         <option value="completed">Completed</option>
       </select>
-      <button type="submit">{{ newTask.id ? 'Update Task' : 'Create Task' }}</button>
+      <button type="submit">{{ selectedTask ? 'Update Task' : 'Create Task' }}</button>
+      <button type="button" v-if="selectedTask" @click="cancelEdit">Cancel</button>
     </form>
 
     <!-- Task List -->
@@ -22,43 +25,35 @@
       <div class="task-card" v-for="task in tasks" :key="task.id">
         <h3>{{ task.title }}</h3>
         <p>{{ task.description }}</p>
+        <p><small>Start: {{ formatDate(task.start_date) }} | End: {{ formatDate(task.end_date) }}</small></p>
         <span class="status" :class="task.status">{{ task.status }}</span>
-<div class="actions">
-  <div class="icon-group">
-    <font-awesome-icon
-      icon="edit"
-      class="icon edit"
-      @click="editTask(task)"
-    />
-    <font-awesome-icon
-      icon="trash"
-      class="icon delete"
-      @click="deleteTask(task.id)"
-    />
-  </div>
-</div>
-
+        <div class="actions">
+          <div class="icon-group">
+            <font-awesome-icon icon="edit" class="icon edit" @click="editTask(task)" />
+            <font-awesome-icon icon="trash" class="icon delete" @click="deleteTask(task.id)" />
+          </div>
+        </div>
         <button class="assign-btn" @click="openAssignModal(task.id)">Assign</button>
       </div>
     </section>
 
+    <!-- Assign Modal -->
     <div v-if="showAssignModal" class="modal-overlay">
-  <div class="modal">
-    <h2>Assign Task</h2>
-    <label>Select User:</label>
-    <select v-model="assignForm.user_id">
-      <option disabled value="">Choose a user</option>
-      <option v-for="user in users" :key="user.id" :value="user.id">
-        {{ user.name }}
-      </option>
-    </select>
-    <div class="modal-actions">
-      <button @click="assignTask">Assign</button>
-      <button @click="closeAssignModal">Cancel</button>
+      <div class="modal">
+        <h2>Assign Task</h2>
+        <label>Select User:</label>
+        <select v-model="assignForm.user_id">
+          <option disabled value="">Choose a user</option>
+          <option v-for="user in users" :key="user.id" :value="user.id">
+            {{ user.name }}
+          </option>
+        </select>
+        <div class="modal-actions">
+          <button @click="assignTask">Assign</button>
+          <button @click="closeAssignModal">Cancel</button>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
-
   </div>
 </template>
 
@@ -69,11 +64,13 @@ export default {
     return {
       tasks: [],
       newTask: {
-        id: null,
         title: '',
         description: '',
-        status: 'pending'
+        status: 'pending',
+        start_date: '',
+        end_date: ''
       },
+      selectedTask: null,
       users: [],
       showAssignModal: false,
       assignForm: {
@@ -90,38 +87,108 @@ export default {
       const res = await fetch('http://localhost:8080/tasks');
       this.tasks = await res.json();
     },
-    async saveTask() {
-      const method = this.newTask.id ? 'PUT' : 'POST';
-      await fetch('http://localhost:8080/tasks', {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(this.newTask)
-      });
-      this.resetForm();
-      this.fetchTasks();
+
+    formatDate(dateStr) {
+      if (!dateStr || dateStr.startsWith('0001')) return '—';
+      const date = new Date(dateStr);
+      return isNaN(date)
+        ? '—'
+        : new Intl.DateTimeFormat('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          }).format(date);
     },
+
+    editTask(task) {
+      this.selectedTask = task;
+      this.newTask = {
+        title: task.title,
+        description: task.description,
+        start_date: task.start_date.split('T')[0],
+        end_date: task.end_date.split('T')[0],
+        status: task.status
+      };
+    },
+
+async saveTask() {
+  const formattedTask = {
+    ...this.newTask,
+    start_date: new Date(this.newTask.start_date + 'T00:00:00Z').toISOString(),
+    end_date: new Date(this.newTask.end_date + 'T00:00:00Z').toISOString(),
+    status: this.newTask.status
+  };
+
+
+  const url = this.selectedTask
+    ? `http://localhost:8080/tasks/${this.selectedTask.id}`
+    : 'http://localhost:8080/tasks';
+
+  const method = this.selectedTask ? 'PUT' : 'POST';
+
+  try {
+    const response = await fetch(url, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formattedTask)
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      alert(errorData.message || 'Failed to save task');
+      return;
+    }
+
+    const savedTask = await response.json();
+
+    if (this.selectedTask) {
+      const index = this.tasks.findIndex(t => t.id === savedTask.id);
+      if (index !== -1) this.tasks.splice(index, 1, savedTask);
+    } else {
+      this.tasks.push(savedTask);
+    }
+
+    this.resetForm();
+    this.selectedTask = null;
+  } catch (err) {
+    console.error('Task save failed:', err);
+    alert('Failed to save task: ' + err.message);
+  }
+}
+,
+
     async deleteTask(id) {
       if (confirm('Delete this task?')) {
-        await fetch(`http://localhost:8080/tasks/${id}`, {
+        const res = await fetch(`http://localhost:8080/tasks/${id}`, {
           method: 'DELETE'
         });
-        this.fetchTasks();
+        if (res.ok) {
+          this.tasks = this.tasks.filter(t => t.id !== id);
+        } else {
+          alert('Failed to delete task');
+        }
       }
     },
-    editTask(task) {
-      this.newTask = { ...task }; // shallow copy to avoid reference issues
+
+
+
+    cancelEdit() {
+      this.resetForm();
+      this.selectedTask = null;
     },
+
     resetForm() {
       this.newTask = {
-        id: null,
         title: '',
         description: '',
-        status: 'pending'
+        status: 'pending',
+        start_date: '',
+        end_date: ''
       };
     },
 
     async fetchUsers() {
-      const res = await fetch('http://localhost:8080/users'); // Adjust if needed
+      const res = await fetch('http://localhost:8080/users');
       this.users = await res.json();
     },
 
@@ -145,7 +212,6 @@ export default {
         });
 
         const data = await res.json();
-        console.log("Assign Response:", data);
 
         if (!res.ok) {
           throw new Error(data.message || 'Failed to assign task');
@@ -158,7 +224,6 @@ export default {
         alert("Error assigning task: " + err.message);
       }
     }
-
   }
 };
 </script>
@@ -181,7 +246,7 @@ export default {
 
 .assign-btn {
   margin-top: 12px;
-  background-color: #e1e731; /* Tailwind green-500 */
+  background-color: #e1e731;
   color: rgb(0, 0, 0);
   border: none;
   padding: 0.5rem 1rem;
@@ -192,7 +257,7 @@ export default {
 }
 
 .assign-btn:hover {
-  background-color: #2c2a2a; /* Tailwind green-600 */
+  background-color: #2c2a2a;
   transform: translateY(-1px);
   color: white;
 }
@@ -219,6 +284,11 @@ export default {
   padding: 0.5rem 1rem;
   border-radius: 6px;
   cursor: pointer;
+}
+
+.task-form button[type="button"] {
+  background-color: #9ca3af;
+  margin-left: 0.5rem;
 }
 
 .task-list {
@@ -270,7 +340,7 @@ export default {
 
 .actions {
   display: flex;
-  justify-content: flex-end; /* Push icons to the right */
+  justify-content: flex-end;
   margin-top: 8px;
 }
 
@@ -280,60 +350,41 @@ export default {
 }
 
 .icon {
-  font-size: 1.25rem; /* ~20px */
+  font-size: 1.25rem;
   cursor: pointer;
-  transition: transform 0.2s ease, opacity 0.2s ease;
-  opacity: 0.9;
-}
-
-.icon:hover {
-  transform: scale(1.15);
-  opacity: 1;
 }
 
 .icon.edit {
-  color: #daea33; /* Tailwind blue-500 */
+  color: #2563eb;
 }
 
 .icon.delete {
-  color: #000000; /* Tailwind red-500 */
+  color: #ef4444;
 }
 
+/* Modal styles */
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0,0,0,0.5);
   display: flex;
-  align-items: center;
   justify-content: center;
-  z-index: 1000;
+  align-items: center;
 }
 
 .modal {
   background: white;
   padding: 2rem;
   border-radius: 10px;
-  width: 90%;
-  max-width: 400px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-}
-
-.modal h2 {
-  margin-bottom: 1rem;
-}
-
-.modal select {
-  width: 100%;
-  padding: 0.5rem;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  margin-bottom: 1.5rem;
+  width: 300px;
+  max-width: 90vw;
 }
 
 .modal-actions {
+  margin-top: 1.5rem;
   display: flex;
   justify-content: flex-end;
   gap: 1rem;
@@ -347,13 +398,12 @@ export default {
 }
 
 .modal-actions button:first-child {
-  background-color: #10b981;
+  background-color: #2563eb;
   color: white;
 }
 
 .modal-actions button:last-child {
-  background-color: #e5e7eb;
-  color: #374151;
+  background-color: #9ca3af;
+  color: white;
 }
-
 </style>

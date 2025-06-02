@@ -5,7 +5,7 @@
       <p>Manage your active and archived projects.</p>
     </header>
 
-    <form @submit.prevent="createProject" class="project-form">
+    <form @submit.prevent="saveProject" class="project-form">
       <input v-model="newProject.name" placeholder="Project Name" required />
       <input v-model="newProject.description" placeholder="Description" required />
       <input v-model="newProject.start_date" type="date" required />
@@ -15,32 +15,30 @@
         <option value="active">Active</option>
         <option value="completed">Completed</option>
       </select>
-      <button type="submit">Create Project</button>
+      <button type="submit">
+        {{ selectedProject ? 'Update Project' : 'Create Project' }}
+      </button>
     </form>
 
-    <section class="project-list">
-      <div class="project-card" v-for="project in projects" :key="project.id">
-        <h3>{{ project.name }}</h3>
-        <p>{{ project.description }}</p>
-        <p><strong>Start:</strong> {{ formatDate(project.start_date) }}</p>
-        <p><strong>End:</strong> {{ formatDate(project.end_date) }}</p>
-        <span class="status" :class="project.status">{{ project.status }}</span>
-<div class="actions">
-  <div class="icon-group">
-    <font-awesome-icon
-      icon="edit"
-      class="icon edit"
-      @click="editProject(project)"
-    />
-    <font-awesome-icon
-      icon="trash"
-      class="icon delete"
-      @click="deleteProject(project.id)"
-    />
-  </div>
-</div>
+<section class="project-list">
+  <div class="project-card" v-for="project in projects" :key="project.id">
+    <router-link :to="`/projects/${project.id}`">
+      <h3>{{ project.name }}</h3>
+      <p>{{ project.description }}</p>
+      <p><strong>Start:</strong> {{ formatDate(project.start_date) }}</p>
+      <p><strong>End:</strong> {{ formatDate(project.end_date) }}</p>
+      <span class="status" :class="project.status">{{ project.status }}</span>
+    </router-link>
+
+    <div class="actions">
+      <div class="icon-group">
+        <font-awesome-icon icon="edit" class="icon edit" @click="editProject(project)" />
+        <font-awesome-icon icon="trash" class="icon delete" @click="deleteProject(project.id)" />
       </div>
-    </section>
+    </div>
+  </div>
+</section>
+
   </div>
 </template>
 
@@ -56,7 +54,8 @@ export default {
         start_date: '',
         end_date: '',
         status: 'planning'
-      }
+      },
+      selectedProject: null
     };
   },
   mounted() {
@@ -67,58 +66,79 @@ export default {
       const res = await fetch('http://localhost:8080/projects');
       this.projects = await res.json();
     },
-async createProject() {
-  const formattedProject = {
-    ...this.newProject,
-    start_date: new Date(this.newProject.start_date + 'T00:00:00Z').toISOString(),
-    end_date: new Date(this.newProject.end_date + 'T00:00:00Z').toISOString()
-  };
+    formatDate(dateStr) {
+      if (!dateStr || dateStr.startsWith('0001')) return '—';
+      const date = new Date(dateStr);
+      return isNaN(date)
+        ? '—'
+        : new Intl.DateTimeFormat('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          }).format(date);
+    },
+    async deleteProject(id) {
+      if (confirm('Are you sure you want to delete this project?')) {
+        await fetch(`http://localhost:8080/projects/${id}`, {
+          method: 'DELETE'
+        });
+        this.fetchProjects();
+      }
+    },
+    editProject(project) {
+      this.selectedProject = { ...project };
+      this.newProject = {
+        name: project.name,
+        description: project.description,
+        start_date: project.start_date.split('T')[0],
+        end_date: project.end_date.split('T')[0],
+        status: project.status
+      };
+    },
+    async saveProject() {
+      const formattedProject = {
+        ...this.newProject,
+        start_date: new Date(this.newProject.start_date + 'T00:00:00Z').toISOString(),
+        end_date: new Date(this.newProject.end_date + 'T00:00:00Z').toISOString(),
+        status: this.newProject.status
+      };
 
-  await fetch('http://localhost:8080/projects', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(formattedProject)
-  });
+      const url = this.selectedProject
+        ? `http://localhost:8080/projects/${this.selectedProject.id}`
+        : 'http://localhost:8080/projects';
 
-  this.newProject = {
-    name: '',
-    description: '',
-    start_date: '',
-    end_date: '',
-    status: 'planning'
-  };
+      const method = this.selectedProject ? 'PUT' : 'POST';
 
-  this.fetchProjects();
-}
-
-,
-formatDate(dateStr) {
-  if (!dateStr || dateStr.startsWith('0001')) return '—';
-  const date = new Date(dateStr);
-  return isNaN(date)
-    ? '—'
-    : new Intl.DateTimeFormat('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      }).format(date);
-},
-
-  async deleteProject(id) {
-    if (confirm('Are you sure you want to delete this project?')) {
-      await fetch(`http://localhost:8080/projects/${id}`, {
-        method: 'DELETE'
+      const response = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formattedProject)
       });
-      this.fetchProjects();
-    }
-  },
-  editProject(project) {
-    this.newProject = { ...project };
-    // Format for input[type="date"]
-    this.newProject.start_date = project.start_date.split('T')[0];
-    this.newProject.end_date = project.end_date.split('T')[0];
-  }
 
+      if (!response.ok) {
+        const errorData = await response.json();
+        alert(errorData.message || 'Failed to save project');
+        return;
+      }
+
+      const savedProject = await response.json();
+
+      if (this.selectedProject) {
+        const index = this.projects.findIndex(p => p.id === savedProject.id);
+        if (index !== -1) this.projects[index] = savedProject;
+      } else {
+        this.projects.push(savedProject);
+      }
+
+      this.newProject = {
+        name: '',
+        description: '',
+        start_date: '',
+        end_date: '',
+        status: 'planning'
+      };
+      this.selectedProject = null;
+    }
   }
 };
 </script>
@@ -165,7 +185,7 @@ formatDate(dateStr) {
 
 .actions {
   display: flex;
-  justify-content: flex-end; /* Push icons to the right */
+  justify-content: flex-end;
   margin-top: 8px;
 }
 
@@ -175,7 +195,7 @@ formatDate(dateStr) {
 }
 
 .icon {
-  font-size: 1.25rem; /* ~20px */
+  font-size: 1.25rem;
   cursor: pointer;
   transition: transform 0.2s ease, opacity 0.2s ease;
   opacity: 0.9;
@@ -187,11 +207,11 @@ formatDate(dateStr) {
 }
 
 .icon.edit {
-  color: #daea33; /* Tailwind blue-500 */
+  color: #daea33;
 }
 
 .icon.delete {
-  color: #000000; /* Tailwind red-500 */
+  color: #000000;
 }
 
 .project-list {
@@ -218,6 +238,12 @@ formatDate(dateStr) {
   margin-bottom: 0.5rem;
 }
 
+.project-card a {
+  text-decoration: none;
+  color: inherit;
+}
+
+
 .status {
   padding: 0.25rem 0.75rem;
   border-radius: 999px;
@@ -231,7 +257,6 @@ formatDate(dateStr) {
   color: #047857;
 }
 
-.status.on-hold,
 .status.planning {
   background-color: #fef3c7;
   color: #b45309;

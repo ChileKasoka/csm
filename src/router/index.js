@@ -10,6 +10,7 @@ import SettingsPage from '@/pages/SettingsPage.vue'
 import ProjectsPage from '@/pages/ProjectsPage.vue'
 import AssignmentPermissions from '@/pages/AssignmentPermissions.vue'
 import RolePermissionsPage from '@/pages/RolePermissions.vue'
+import ProjectDetail from '@/pages/ProjectDetail.vue'
 
 const routes = [
   {
@@ -30,12 +31,19 @@ const routes = [
         component: AssignmentPermissions,
       },
       {
-        path: '/role-permissions',
+        path: 'role-permissions',
         name: 'RolePermissions',
         component: RolePermissionsPage,
       },
       {path: 'projects', name: 'projects', component: ProjectsPage },
-      { path: 'settings', name: 'settings', component: SettingsPage }
+      { path: 'settings', name: 'settings', component: SettingsPage },
+      {
+        path: 'projects/:id',
+        name: 'ProjectDetail',
+        component: ProjectDetail,
+        props: true
+      }
+
     ]
   },
   {

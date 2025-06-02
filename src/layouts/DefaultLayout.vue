@@ -157,6 +157,7 @@ onMounted(() => {
   flex: 1;
   padding: 2rem;
   overflow-y: auto;
+  background-color: rgb(230, 230, 230);
 }
 
 .header h1 {
