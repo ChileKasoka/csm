@@ -89,7 +89,7 @@ onMounted(() => {
   color: #fff;
   top: 0.5rem;
   left: 0.5rem;
-  background: #1f1f1e;
+  background: #ffff1a;
   border: none;
   padding: 0.5rem 1rem;
   font-size: 0.7rem;
@@ -105,7 +105,7 @@ onMounted(() => {
 /* Sidebar */
 .sidebar {
   width: 250px;
-  background-color: #292929;
+  background-color: #676767;
   padding: 2rem 1rem;
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
   transition: transform 0.3s ease;
@@ -240,7 +240,7 @@ details[open] summary {
 
 .navbar {
   height: 60px;
-  background: #e4e140;
+  background: #676767;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   display: flex;
   align-items: center;
@@ -256,7 +256,7 @@ details[open] summary {
 
 .user-info {
   font-weight: 500;
-  color: #374151;
+  color: #f5ff32;
 }
 
 </style>

@@ -37,7 +37,7 @@ export default {
 }
 
 .login-left {
-  background-color: #282828;
+  background-color: #676767;
   background-image: url('@/assets/logo.svg');
   background-repeat: no-repeat;
   background-position: center;
