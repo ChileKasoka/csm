@@ -11,6 +11,12 @@ import ProjectsPage from '@/pages/ProjectsPage.vue'
 import AssignmentPermissions from '@/pages/AssignmentPermissions.vue'
 import RolePermissionsPage from '@/pages/RolePermissions.vue'
 import ProjectDetail from '@/pages/ProjectDetail.vue'
+import TaskDetail from '@/pages/TaskDetail.vue'
+import CreateTask from '@/pages/CreateTask.vue'
+import TaskEdit from '@/pages/TaskEdit.vue'
+import CreateProject from '@/pages/CreateProject.vue'
+import EditProject from '@/pages/EditProject.vue'
+import AddUser from '@/pages/AddUser.vue'
 
 const routes = [
   {
@@ -42,8 +48,38 @@ const routes = [
         name: 'ProjectDetail',
         component: ProjectDetail,
         props: true
+      },
+      {
+        path: 'tasks/:id',
+        name: 'TaskDetail',
+        component: TaskDetail,
+        props: true
+      },
+      {
+        path: 'tasks/create',
+        name: 'CreateTask',
+        component: CreateTask
+      },
+      {
+        path: '/tasks/:id/edit',
+        name: 'TaskEdit',
+        component: TaskEdit
+      },
+      {
+        path: '/projects/create',
+        name: 'CreateProject',
+        component: CreateProject
+      },
+      {
+        path: '/projects/:id/edit',
+        name: 'EditProject',
+        component: EditProject
+      },
+      {
+        path: '/add-user',
+        name: 'AddUser',
+        component: AddUser
       }
-
     ]
   },
   {

@@ -6,7 +6,7 @@
       Status: 
       <span :class="statusClass">{{ project.status }}</span>
     </p>
-    <!-- Add more details -->
+    <router-link to="/projects" class="back-button">← Back to Projects</router-link>
   </div>
 </template>
 
@@ -105,5 +105,18 @@ export default {
 .status-pending {
   background-color: #f8d7da;
   color: #721c24;
+}
+
+.back-button {
+  display: inline-block;
+  margin-top: 2rem;
+  color: #2563eb;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.back-button:hover {
+  color: #1e40af;
 }
 </style>
