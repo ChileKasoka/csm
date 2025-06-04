@@ -24,20 +24,28 @@
     <router-link to="/projects">🚧 Projects</router-link>
     <div></div>
     <router-link to="/tasks">📝 Assignments</router-link>
+  </div>
+</details>
+
+<details>
+  <summary>⚙️ Settings</summary>
+  <div class="submenu">
+    <!-- You can keep a link to /settings if needed -->
+     <div></div>
+    <router-link to="/settings">⚙️ General Settings</router-link>
+
+    <!-- Access Control submenu inside Settings -->
     <details>
       <summary>🔐 Access Control</summary>
       <div class="submenu">
-        <div></div>
         <router-link to="/roles">Roles</router-link>
-        <router-link to="/assign">Permisisons</router-link>
-        <router-link to="/role-permissions">Role Permisisons</router-link>
+        <router-link to="/assign">Permissions</router-link>
+        <router-link to="/role-permissions">Role Permissions</router-link>
       </div>
     </details>
   </div>
 </details>
 
-<div></div>
-        <router-link to="/settings">⚙️ Settings</router-link>
       </nav>
     </aside>
 
