@@ -17,6 +17,7 @@ import TaskEdit from '@/pages/TaskEdit.vue'
 import CreateProject from '@/pages/CreateProject.vue'
 import EditProject from '@/pages/EditProject.vue'
 import AddUser from '@/pages/AddUser.vue'
+import AssignUsersToTask from '@/pages/AssignUsersToTask.vue'
 
 const routes = [
   {
@@ -79,7 +80,13 @@ const routes = [
         path: '/add-user',
         name: 'AddUser',
         component: AddUser
+      },
+      {
+        path: '/tasks/:id/assign-users',
+        name: 'AssignUsersToTask',
+        component: AssignUsersToTask
       }
+
     ]
   },
   {

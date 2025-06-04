@@ -23,7 +23,7 @@
               <font-awesome-icon icon="trash" class="icon delete" @click.stop.prevent="deleteTask(task.id)" />
             </div>
           </div>
-          <button class="assign-btn" @click.stop.prevent="openAssignModal(task.id)">Assign</button>
+          <button class="assign-btn" @click.stop.prevent="goToAssignUsers(task.id)">Assign</button>
         </div>
       </router-link>
     </section>
@@ -72,9 +72,8 @@ export default {
     editTask(task) {
       this.$router.push(`/tasks/${task.id}/edit`);
     },
-    openAssignModal(taskId) {
-      alert(`Open assignment modal for Task ID ${taskId}`);
-      // Replace with modal logic
+    goToAssignUsers(taskId) {
+      this.$router.push(`/tasks/${taskId}/assign-users`);
     }
   }
 };
