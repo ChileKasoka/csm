@@ -12,6 +12,7 @@
         <option value="completed">Completed</option>
       </select>
       <button type="submit">Create Project</button>
+      <router-link to="/projects" class="cancel-link">Cancel</router-link>
     </form>
   </div>
 </template>
@@ -84,5 +85,12 @@ export default {
   border: none;
   border-radius: 6px;
   cursor: pointer;
+}
+
+.cancel-link {
+  margin-top: 1rem;
+  display: inline-block;
+  color: #6b7280;
+  text-decoration: underline;
 }
 </style>

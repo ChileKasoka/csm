@@ -15,15 +15,15 @@
         <div class="task-card">
           <h3>{{ task.title }}</h3>
           <p>{{ task.description }}</p>
-          <p><small>Start: {{ formatDate(task.start_date) }} | End: {{ formatDate(task.end_date) }}</small></p>
+          <p class="format-time"><small>Start: {{ formatDate(task.start_date) }} | <br> End: {{ formatDate(task.end_date) }}</small></p>
           <span class="status" :class="task.status">{{ task.status }}</span>
           <div class="actions">
             <div class="icon-group">
               <font-awesome-icon icon="edit" class="icon edit" @click.stop.prevent="editTask(task)" />
               <font-awesome-icon icon="trash" class="icon delete" @click.stop.prevent="deleteTask(task.id)" />
             </div>
+            <button class="assign-btn" @click.stop.prevent="goToAssignUsers(task.id)">Assign</button>
           </div>
-          <button class="assign-btn" @click.stop.prevent="goToAssignUsers(task.id)">Assign</button>
         </div>
       </router-link>
     </section>
@@ -91,19 +91,28 @@ export default {
   margin-bottom: 1.5rem;
 }
 
+.header h1 {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 0.25rem;
+}
+
 .create-btn {
-  background-color: #2563eb;
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
+  background-color: #676767;
+  color: #ffffff;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: bold;
+  margin-bottom: 1rem;
   text-decoration: none;
-  font-weight: 600;
 }
 
 .create-btn:hover {
-  background-color: #1e40af;
+  background: #e4e140;
+  color: #1f1f1e;
 }
-
 .task-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -122,6 +131,12 @@ export default {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   transition: transform 0.2s;
   position: relative;
+}
+
+.task-card h3 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  padding-bottom: 1rem;
 }
 
 .task-card:hover {
@@ -155,11 +170,14 @@ export default {
   position: absolute;
   top: 1rem;
   right: 1rem;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .icon-group {
   display: flex;
   gap: 0.5rem;
+  justify-content: end;
 }
 
 .icon {
@@ -168,24 +186,43 @@ export default {
 }
 
 .icon.edit {
-  color: #2563eb;
+  color: #676767;
+}
+
+.icon.edit :hover {
+  color: #e4e140;
 }
 
 .icon.delete {
-  color: #ef4444;
+  color: #676767;
+}
+
+.icon.delete :hover {
+  color: rgb(175, 17, 17);
 }
 
 .assign-btn {
-  margin-top: 1rem;
-  background-color: #10b981;
-  color: white;
+  margin-top: 2rem;
+  background-color: #676767;
+  color: #ffffff;
   border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
+  padding: 0.6rem 1.2rem;
+  border-radius: 20px;
   cursor: pointer;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  text-decoration: none;
 }
 
 .assign-btn:hover {
-  background-color: #059669;
+  background: #e4e140;
+  color: #1f1f1e;
+}
+
+.format-time {
+  padding-top: 1rem;
+  width: 50%;
+  font-size: small;
+  color: #676767;
 }
 </style>

@@ -1,9 +1,13 @@
 <template>
   <div class="projects-page">
     <header class="page-header">
-      <h1>📁 Projects</h1>
-      <p>Manage your active and archived projects.</p>
-      <router-link to="/projects/create" class="create-btn">+ New Project</router-link>
+      <div>
+        <h1>📁 Projects</h1>
+        <p>Manage your active and archived projects.</p>
+      </div>
+      <div>
+        <router-link to="/projects/create" class="create-btn">+ New Project</router-link>
+      </div>
     </header>
 
     <section class="project-list">
@@ -12,7 +16,7 @@
           <h3>{{ project.name }}</h3>
           <p>{{ project.description }}</p>
           <p><strong>Start:</strong> {{ formatDate(project.start_date) }}</p>
-          <p><strong>End:</strong> {{ formatDate(project.end_date) }}</p>
+          <p class="time"><strong>End:</strong> {{ formatDate(project.end_date) }}</p>
           <span class="status" :class="project.status">{{ project.status }}</span>
         </router-link>
 
@@ -75,6 +79,13 @@ export default {
   font-family: 'Segoe UI', sans-serif;
 }
 
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 2rem;
+}
+
 .page-header h1 {
   font-size: 2rem;
   font-weight: bold;
@@ -87,20 +98,21 @@ export default {
 }
 
 .create-btn {
-  display: inline-block;
-  margin-bottom: 1rem;
-  background-color: #10b981;
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  text-decoration: none;
+  background-color: #676767;
+  color: #ffffff;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 20px;
+  cursor: pointer;
   font-weight: bold;
+  margin-bottom: 1rem;
+  text-decoration: none;
 }
 
 .create-btn:hover {
-  background-color: #059669;
+  background: #e4e140;
+  color: #1f1f1e;
 }
-
 .project-list {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -114,9 +126,17 @@ export default {
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
 }
 
+.time {
+  font-size: small;
+  color: #676767;
+}
+
 .project-card h3 {
   margin-bottom: 0.5rem;
   color: #1f2937;
+  font-size: 1.5rem;
+  font-weight: bold;
+  padding-bottom: 1rem;
 }
 
 .project-card p {

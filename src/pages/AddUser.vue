@@ -39,26 +39,40 @@
 <script>
 export default {
   name: 'AddUser',
-  props: {
-    roles: Array
-  },
   data() {
     return {
       newUser: {
         name: '',
         email: '',
         role_id: ''
-      }
+      },
+      roles: []
     };
   },
+  mounted() {
+    this.fetchRoles();
+  },
   methods: {
+    async fetchRoles() {
+      try {
+        const token = localStorage.getItem('access_token');
+        const res = await fetch('http://localhost:8080/roles', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error('Failed to fetch roles');
+        this.roles = await res.json();
+      } catch (err) {
+        console.error('Error fetching roles:', err);
+      }
+    },
     async handleAddUser() {
       if (this.newUser.name && this.newUser.email && this.newUser.role_id) {
         try {
           const response = await fetch('http://localhost:8080/users', {
             method: 'POST',
             headers: {
-              'Content-Type': 'application/json'
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${localStorage.getItem('access_token')}`
             },
             body: JSON.stringify(this.newUser)
           });
@@ -78,7 +92,7 @@ export default {
             role_id: createdUser.role?.id || null
           });
 
-          this.newUser = { name: '', email: '', role_id: '' };
+          this.$router.push('/team');
         } catch (error) {
           alert('Error adding user: ' + error.message);
         }

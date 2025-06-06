@@ -18,6 +18,16 @@
         <h3>Team Members</h3>
         <p class="number"> {{ teamCount }} </p>
       </div>
+    <div class="card task-list-card">
+      <h3>My Assigned Tasks</h3>
+      <ul>
+        <li v-for="task in assignedTasks" :key="task.id">
+          {{ task.title }} <br> {{ task.description }}
+        </li>
+        <li v-if="assignedTasks.length === 0">No tasks assigned</li>
+      </ul>
+    </div>
+
     </section>
   </div>
 </template>
@@ -26,41 +36,62 @@
 export default {
   name: 'DashboardPage',
 
-  data() {
-    return {
-      userName: '',
-      teamCount: 0
-    }
-  },
+data() {
+  return {
+    userName: '',
+    teamCount: 0,
+    userId: null,
+    assignedTasks: []
+  };
+},
 
-  mounted() {
-    const storedName = localStorage.getItem('user');
-    if (storedName) {
-      this.userName = JSON.parse(storedName);
-    }
-    this.fetchTeamCount(); // properly scoped now
-  },
+mounted() {
+  const storedUser = localStorage.getItem('user');
+  if (storedUser) {
+    const userObj = JSON.parse(storedUser);
+    this.userName = userObj.name || '';
+    this.userId = userObj.id;
+    this.fetchAssignedTasks();
+  }
 
-  methods: {
-    async fetchTeamCount() {
-      try {
-        const response = await fetch('http://localhost:8080/users/count', {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('access_token')}`
-          }
-        });
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
+  this.fetchTeamCount();
+},
+
+methods: {
+  async fetchTeamCount() {
+    try {
+      const response = await fetch('http://localhost:8080/users/count', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('access_token')}`
         }
-        const data = await response.json();
-        this.teamCount = data;
-        console.log('Team data:', data);
-      } catch (error) {
-        console.error('There has been a problem with your fetch operation:', error);
-      }
+      });
+      const data = await response.json();
+      this.teamCount = data;
+    } catch (error) {
+      console.error('Error fetching team count:', error);
+    }
+  },
+
+  async fetchAssignedTasks() {
+    if (!this.userId) return;
+
+    try {
+      console.log('Calling fetchAssignedTasks with userId:', this.userId);
+
+        const response = await fetch(`http://localhost:8080/user-tasks/${this.userId}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+        }
+      });
+
+      const data = await response.json();
+      this.assignedTasks = Array.isArray(data) ? data : [];
+    } catch (error) {
+      console.error('Error fetching assigned tasks:', error);
     }
   }
 }
+};
 </script>
 
 <style scoped>
@@ -83,7 +114,7 @@ export default {
 .cards {
   margin-top: 2rem;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 1.5rem;
 }
 
@@ -111,4 +142,48 @@ export default {
   font-weight: bold;
   color: #e4e140;
 }
+
+.task-list-card {
+  background-color: #f9fafb;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.task-list-card h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 1rem;
+}
+
+.task-list-card ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.task-list-card li {
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.75rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+  transition: background-color 0.2s ease;
+}
+
+.task-list-card li:hover {
+  background-color: #f3f4f6;
+}
+
+.task-list-card li:last-child {
+  margin-bottom: 0;
+}
+
+.task-list-card li > br {
+  margin-bottom: 0.3rem;
+}
+
+
 </style>

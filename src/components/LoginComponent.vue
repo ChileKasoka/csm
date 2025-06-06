@@ -57,7 +57,7 @@ export default {
         const data = await response.json();
 
         localStorage.setItem("access_token", data.access_token);
-        localStorage.setItem("user", JSON.stringify(data.user));
+        localStorage.setItem("user", JSON.stringify({ id: data.user.id, name: data.user.name }));
 
         // Optional: redirect or update UI here
         this.$router.push('/dashboard')

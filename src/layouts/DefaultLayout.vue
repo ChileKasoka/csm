@@ -5,9 +5,13 @@
       ☰
     </button> -->
     <aside class="sidebar" :class="{ 'collapsed': !isSidebarOpen }">
-    <div style="display: flex;">
-      <h2 class="logo">Northern Hire Ltd</h2>
-      <img src="../assets/logo.svg" alt="Logo" style="width: 50px; height: 50px; margin-left: 1rem;" />
+    <div class="logo-title">
+      <div>
+        <h2 class="logo">Northern Hire Ltd</h2>
+      </div>
+      <div>
+        <img src="../assets/logo.svg" alt="Logo" style="width: 50px; height: 50px; margin-left: 1rem;" />
+      </div>
     </div>
 
     <hr />
@@ -57,7 +61,7 @@
           ☰
         </button>
         <div class="navbar-right">
-          <span class="user-info">Hi, {{ userName }}</span>
+          <span class="user-info">Hi, {{ userName.name }}</span>
         </div>
       </header>
       <router-view />
@@ -133,7 +137,15 @@ onMounted(() => {
   color: #e4e140;
   margin-bottom: 2rem;
   text-align: left;
-  font-family: "Bodoni Moda"
+  font-family: "Bodoni Moda";
+  font-size: medium;
+}
+
+.logo-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: auto;
 }
 
 .sidebar hr {
