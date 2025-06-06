@@ -1,7 +1,7 @@
 <template>
   <div class="dashboard-overview">
     <header class="header">
-      <h1>Welcome back, {{userName}}</h1>
+      <h1>Welcome back, {{ userName }}</h1>
       <p>Here is your activity snapshot for today.</p>
     </header>
 
@@ -18,16 +18,18 @@
         <h3>Team Members</h3>
         <p class="number"> {{ teamCount }} </p>
       </div>
-    <div class="card task-list-card">
-      <h3>My Assigned Tasks</h3>
-      <ul>
-        <li v-for="task in assignedTasks" :key="task.id">
-          {{ task.title }} <br> {{ task.description }}
-        </li>
-        <li v-if="assignedTasks.length === 0">No tasks assigned</li>
-      </ul>
-    </div>
-
+      <div class="card task-list-card">
+        <h3>My Assigned Tasks</h3>
+        <ul>
+          <li v-for="task in assignedTasks" :key="task.task_id">
+            <router-link :to="`/tasks/${task.task_id}`" class="task-link">
+              <strong>{{ task.title }}</strong><br>
+              <span class="description">{{ truncate(task.description) }}</span>
+            </router-link>
+          </li>
+          <li v-if="assignedTasks.length === 0">No tasks assigned</li>
+        </ul>
+      </div>
     </section>
   </div>
 </template>
@@ -36,61 +38,64 @@
 export default {
   name: 'DashboardPage',
 
-data() {
-  return {
-    userName: '',
-    teamCount: 0,
-    userId: null,
-    assignedTasks: []
-  };
-},
-
-mounted() {
-  const storedUser = localStorage.getItem('user');
-  if (storedUser) {
-    const userObj = JSON.parse(storedUser);
-    this.userName = userObj.name || '';
-    this.userId = userObj.id;
-    this.fetchAssignedTasks();
-  }
-
-  this.fetchTeamCount();
-},
-
-methods: {
-  async fetchTeamCount() {
-    try {
-      const response = await fetch('http://localhost:8080/users/count', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('access_token')}`
-        }
-      });
-      const data = await response.json();
-      this.teamCount = data;
-    } catch (error) {
-      console.error('Error fetching team count:', error);
-    }
+  data() {
+    return {
+      userName: '',
+      teamCount: 0,
+      userId: null,
+      assignedTasks: []
+    };
   },
 
-  async fetchAssignedTasks() {
-    if (!this.userId) return;
-
-    try {
-      console.log('Calling fetchAssignedTasks with userId:', this.userId);
-
-        const response = await fetch(`http://localhost:8080/user-tasks/${this.userId}`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('access_token')}`
-        }
-      });
-
-      const data = await response.json();
-      this.assignedTasks = Array.isArray(data) ? data : [];
-    } catch (error) {
-      console.error('Error fetching assigned tasks:', error);
+  mounted() {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      const userObj = JSON.parse(storedUser);
+      this.userName = userObj.name || '';
+      this.userId = userObj.id;
+      this.fetchAssignedTasks();
     }
+
+    this.fetchTeamCount();
+  },
+
+  methods: {
+    async fetchTeamCount() {
+      try {
+        const response = await fetch('http://localhost:8080/users/count', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+          }
+        });
+        const data = await response.json();
+        this.teamCount = data;
+      } catch (error) {
+        console.error('Error fetching team count:', error);
+      }
+    },
+
+async fetchAssignedTasks() {
+  if (!this.userId) return;
+
+  try {
+    const response = await fetch(`http://localhost:8080/user-tasks/${this.userId}`, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+      }
+    });
+
+    const data = await response.json();
+    console.log("Fetched assigned tasks:", data);
+    this.assignedTasks = Array.isArray(data) ? data : [];
+  } catch (error) {
+    console.error('Error fetching assigned tasks:', error);
   }
 }
+,
+    truncate(text, length = 100) {
+      return text.length > length ? text.substring(0, length) + '...' : text;
+    }
+  }
 };
 </script>
 
@@ -177,13 +182,19 @@ methods: {
   background-color: #f3f4f6;
 }
 
-.task-list-card li:last-child {
-  margin-bottom: 0;
+.task-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
 }
 
-.task-list-card li > br {
-  margin-bottom: 0.3rem;
+.task-link:hover {
+  text-decoration: underline;
+  color: #374151;
 }
 
-
+.description {
+  color: #6b7280;
+  font-size: 0.9rem;
+}
 </style>

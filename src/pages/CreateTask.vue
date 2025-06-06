@@ -7,12 +7,22 @@
         <textarea v-model="description" placeholder="Description" required></textarea>
         <input v-model="start_date" type="date" required />
         <input v-model="end_date" type="date" required />
+
+        <!-- Project Select Dropdown -->
+        <select v-model="project_id" required>
+          <option disabled value="">Select Project</option>
+          <option v-for="project in projects" :key="project.id" :value="project.id">
+            {{ project.name }}
+          </option>
+        </select>
+
         <select v-model="status" required>
           <option disabled value="">Select Status</option>
           <option value="pending">Pending</option>
           <option value="in-progress">In Progress</option>
           <option value="completed">Completed</option>
         </select>
+
         <button type="submit">Create Task</button>
         <router-link to="/tasks" class="cancel-link">Cancel</router-link>
       </form>
@@ -22,44 +32,58 @@
 
 <script>
 export default {
+  name: "CreateTask",
   data() {
     return {
       title: '',
       description: '',
       start_date: '',
       end_date: '',
-      status: ''
+      status: '',
+      project_id: '', // new
+      projects: []    // new
     };
   },
+  mounted() {
+    this.fetchProjects();
+  },
   methods: {
-    name: "CreateTask",
-async createTask() {
-  const payload = {
-    title: this.title,
-    description: this.description,
-    start_date: new Date(this.start_date + 'T00:00:00Z').toISOString(),
-    end_date: new Date(this.end_date + 'T00:00:00Z').toISOString(),
-    status: this.status
-  };
+    async fetchProjects() {
+      try {
+        const res = await fetch('http://localhost:8080/projects');
+        this.projects = await res.json();
+      } catch (err) {
+        alert('Failed to load projects: ' + err.message);
+      }
+    },
 
-  try {
-    const res = await fetch('http://localhost:8080/tasks', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
+    async createTask() {
+      const payload = {
+        title: this.title,
+        description: this.description,
+        start_date: new Date(this.start_date + 'T00:00:00Z').toISOString(),
+        end_date: new Date(this.end_date + 'T00:00:00Z').toISOString(),
+        status: this.status,
+        project_id: parseInt(this.project_id)
+      };
 
-    if (res.ok) {
-      this.$router.push('/tasks');
-    } else {
-      const error = await res.json();
-      alert(error.message || 'Failed to create task');
+      try {
+        const res = await fetch('http://localhost:8080/tasks', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (res.ok) {
+          this.$router.push('/tasks');
+        } else {
+          const error = await res.json();
+          alert(error.message || 'Failed to create task');
+        }
+      } catch (err) {
+        alert('Failed to create task: ' + err.message);
+      }
     }
-  } catch (err) {
-    alert('Failed to create task: ' + err.message);
-  }
-}
-
   }
 };
 </script>

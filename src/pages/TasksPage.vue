@@ -14,9 +14,14 @@
       >
         <div class="task-card">
           <h3>{{ task.title }}</h3>
-          <p>{{ task.description }}</p>
-          <p class="format-time"><small>Start: {{ formatDate(task.start_date) }} | <br> End: {{ formatDate(task.end_date) }}</small></p>
-          <span class="status" :class="task.status">{{ task.status }}</span>
+          <div class="description">
+            <p>{{ task.description.length > 100 ? task.description.substring(0, 100) + '...' : task.description }}</p>
+          </div>
+          <div class="task-details">
+          <div>
+            <p class="format-time"><small>Start: {{ formatDate(task.start_date) }} | <br> End: {{ formatDate(task.end_date) }}</small></p>
+            <span class="status" :class="task.status">{{ task.status }}</span>
+          </div>
           <div class="actions">
             <div class="icon-group">
               <font-awesome-icon icon="edit" class="icon edit" @click.stop.prevent="editTask(task)" />
@@ -24,6 +29,8 @@
             </div>
             <button class="assign-btn" @click.stop.prevent="goToAssignUsers(task.id)">Assign</button>
           </div>
+          </div>
+
         </div>
       </router-link>
     </section>
@@ -143,12 +150,23 @@ export default {
   transform: translateY(-4px);
 }
 
+.task-details {
+  display: flex;
+  justify-content: space-between;
+}
+
 .status {
   display: inline-block;
   padding: 0.3rem 0.6rem;
   border-radius: 0.5rem;
   font-size: 0.75rem;
   margin-top: 0.5rem;
+}
+
+.description {
+  width: 70%;
+  padding: 1rem;
+  color: #676767;
 }
 
 .status.pending {
@@ -167,8 +185,7 @@ export default {
 }
 
 .actions {
-  position: absolute;
-  top: 1rem;
+  bottom: 1rem;
   right: 1rem;
   justify-content: space-between;
   align-items: center;
@@ -221,7 +238,6 @@ export default {
 
 .format-time {
   padding-top: 1rem;
-  width: 50%;
   font-size: small;
   color: #676767;
 }
