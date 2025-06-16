@@ -4,54 +4,53 @@
     <!-- <button class="toggle-btn" @click="toggleSidebar">
       ☰
     </button> -->
-    <aside class="sidebar" :class="{ 'collapsed': !isSidebarOpen }">
-    <div class="logo-title">
-      <div>
-        <h2 class="logo">Northern Hire Ltd</h2>
-      </div>
-      <div>
-        <img src="../assets/logo.svg" alt="Logo" style="width: 50px; height: 50px; margin-left: 1rem;" />
-      </div>
+<aside class="sidebar" :class="{ 'collapsed': !isSidebarOpen }">
+  <div class="logo-title">
+    <div>
+      <h2 class="logo">Northern Hire Ltd</h2>
     </div>
-
-    <hr />
-
-      <nav class="nav-links">
-        <router-link to="/dashboard">📉 Dashboard</router-link>
-
-<details>
-  <summary>👷🏿 Resources</summary>
-  <div class="submenu">
-    <div></div>
-    <router-link to="/team">👥 Team</router-link>
-    <div></div>
-    <router-link to="/projects">🚧 Projects</router-link>
-    <div></div>
-    <router-link to="/tasks">📝 Assignments</router-link>
+    <div>
+      <img src="../assets/logo.svg" alt="Logo" style="width: 50px; height: 50px; margin-left: 1rem;" />
+    </div>
   </div>
-</details>
 
-<details>
-  <summary>⚙️ Settings</summary>
-  <div class="submenu">
-    <!-- You can keep a link to /settings if needed -->
-     <div></div>
-    <router-link to="/settings">⚙️ General Settings</router-link>
+  <hr />
 
-    <!-- Access Control submenu inside Settings -->
+  <nav class="nav-links">
+    <router-link to="/dashboard">📉 Dashboard</router-link>
+
     <details>
-      <summary>🔐 Access Control</summary>
+      <summary>👷🏿 Resources</summary>
       <div class="submenu">
-        <router-link to="/roles">Roles</router-link>
-        <router-link to="/assign">Permissions</router-link>
-        <router-link to="/role-permissions">Role Permissions</router-link>
+        <router-link to="/team">👥 Team</router-link>
+        <router-link to="/projects">🚧 Projects</router-link>
+        <router-link to="/tasks">📝 Assignments</router-link>
       </div>
     </details>
-  </div>
-</details>
 
-      </nav>
-    </aside>
+    <details>
+      <summary>⚙️ Settings</summary>
+      <div class="submenu">
+        <router-link to="/settings">⚙️ General Settings</router-link>
+        <details>
+          <summary>🔐 Access Control</summary>
+          <div class="submenu">
+            <router-link to="/roles">Roles</router-link>
+            <router-link to="/assign">Permissions</router-link>
+            <router-link to="/role-permissions">Role Permissions</router-link>
+          </div>
+        </details>
+      </div>
+    </details>
+  </nav>
+
+  <!-- Logout button at bottom -->
+  <div class="logout-section">
+    <hr />
+    <button @click="handleLogout" class="logout-btn">Logout</button>
+  </div>
+</aside>
+
 
     <main class="main-content">
     <!-- Navbar -->
@@ -71,12 +70,17 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import {logout} from '../utils/logout.js'
 
 const isSidebarOpen = ref(true)
 const userName = ref('User')
 
 function toggleSidebar() {
   isSidebarOpen.value = !isSidebarOpen.value
+}
+
+function handleLogout() {
+  logout()
 }
 
 onMounted(() => {
@@ -121,6 +125,8 @@ onMounted(() => {
   padding: 2rem 1rem;
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
   transition: transform 0.3s ease;
+  display: flex;
+  flex-direction: column;
 }
 
 .sidebar.collapsed {
@@ -132,21 +138,22 @@ onMounted(() => {
 
 /* Sidebar Content */
 .logo {
-  font-size: 1.8rem;
+  font-size: 1rem;
   font-weight: bold;
   color: #e4e140;
-  margin-bottom: 2rem;
-  text-align: left;
-  font-family: "Bodoni Moda";
-  font-size: medium;
+  margin: 0;
+  line-height: 1;
+
 }
 
 .logo-title {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: auto;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
 }
+
 
 .sidebar hr {
   border: none;
@@ -277,7 +284,25 @@ details[open] summary {
 
 .user-info {
   font-weight: 500;
-  color: #f5ff32;
+  color: #d8e125;
+}
+
+.logout-btn {
+  margin-left: auto;
+  padding: 6px 12px;
+  background: #d8e125;
+  color: black;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.logout-btn:hover {
+  background: white;
+}
+
+.logout-section {
+  margin-top: auto;
+  padding-top: 1rem
 }
 
 </style>

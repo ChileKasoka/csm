@@ -1,6 +1,15 @@
 <template>
   <div class="container">
-    <h1 class="title">All Permissions</h1>
+    <div class="title">
+      <div class="header">
+        <h1>Assignment Permissions</h1>
+      </div>
+
+      <div class="actions">
+        <router-link to="/create-permission" class="create-btn">Create New Permission</router-link>
+      </div>
+    </div>
+
 
     <div class="table-wrapper">
       <table class="permissions-table">
@@ -156,9 +165,10 @@ mounted() {
   padding: 2rem;
 }
 .title {
-  font-size: 1.75rem;
+  display: flex;
   font-weight: bold;
   margin-bottom: 1rem;
+  justify-content: space-between;
 }
 .table-wrapper {
   background: #fff;
@@ -255,4 +265,23 @@ mounted() {
   border: none;
   border-radius: 0.375rem;
 }
+
+.actions {
+  margin-bottom: 1rem;
+}
+.create-btn {
+  background-color: yellow;
+  color: black;
+  padding: 0.5rem 1rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  text-decoration: none;
+  align-items: end;
+}
+.create-btn:hover {
+  background-color: white;
+}
+
 </style>

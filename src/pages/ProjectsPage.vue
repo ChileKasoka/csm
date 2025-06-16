@@ -6,7 +6,9 @@
         <p>Manage your active and archived projects.</p>
       </div>
       <div>
+      <div v-if="canCreateProject">
         <router-link to="/projects/create" class="create-btn">+ New Project</router-link>
+      </div>
       </div>
     </header>
 
@@ -22,8 +24,12 @@
 
         <div class="actions">
           <div class="icon-group">
-            <font-awesome-icon icon="edit" class="icon edit" @click="editProject(project)" />
-            <font-awesome-icon icon="trash" class="icon delete" @click="deleteProject(project.id)" />
+            <div v-if="canEditProject">
+              <font-awesome-icon icon="edit" class="icon edit" @click="editProject(project)" />
+            </div>
+            <div v-if="canDeleteProject">
+              <font-awesome-icon icon="trash" class="icon delete" @click="deleteProject(project.id)" />
+            </div>
           </div>
         </div>
       </div>
@@ -32,6 +38,9 @@
 </template>
 
 <script>
+import { hasPermission } from '@/utils/permissions';
+
+
 export default {
   name: 'ProjectsPage',
   data() {
@@ -41,6 +50,19 @@ export default {
   },
   mounted() {
     this.fetchProjects();
+  },
+  computed: {
+    canCreateProject() {
+      return hasPermission('Create Project');
+    },
+
+    canEditProject() {
+      return hasPermission('Update Project');
+    },
+
+    canDeleteProject() {
+      return hasPermission('Delete Project');
+    }
   },
   methods: {
     async fetchProjects() {

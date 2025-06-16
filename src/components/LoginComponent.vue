@@ -58,6 +58,7 @@ export default {
 
         localStorage.setItem("access_token", data.access_token);
         localStorage.setItem("user", JSON.stringify({ id: data.user.id, name: data.user.name }));
+        localStorage.setItem("permissions", JSON.stringify(data.permissions));
 
         // Optional: redirect or update UI here
         this.$router.push('/dashboard')
