@@ -10,6 +10,19 @@
       </div>
     </div>
 
+    <div class="bulk-actions" style="margin-bottom: 1.5rem;">
+      <label for="role">Choose Role:</label>
+      <select v-model="selectedRoleId" id="role">
+        <option disabled value="">-- Select Role --</option>
+        <option v-for="role in roles" :value="role.id" :key="role.id">
+          {{ role.name }}
+        </option>
+      </select>
+
+      <button @click="assignPermissions" class="assign-confirm" :disabled="selectedPermissionIds.length === 0 || !selectedRoleId">
+        Assign Selected Permissions
+      </button>
+    </div>
 
     <div class="table-wrapper">
       <table class="permissions-table">
@@ -19,7 +32,7 @@
             <th>Permission</th>
             <th>Method</th>
             <th>Path</th>
-            <th>Action</th>
+            <th>Assign</th>
           </tr>
         </thead>
         <tbody>
@@ -29,7 +42,11 @@
             <td><span class="method">{{ perm.method }}</span></td>
             <td class="path">{{ perm.path }}</td>
             <td>
-              <button @click="openModal(perm)" class="assign-btn">Assign</button>
+              <input
+                type="checkbox"
+                v-model="selectedPermissionIds"
+                :value="perm.id"
+              />
             </td>
           </tr>
         </tbody>
@@ -37,26 +54,6 @@
 
       <div v-if="permissions.length === 0" class="empty">
         No permissions found.
-      </div>
-    </div>
-
-    <!-- Modal -->
-    <div v-if="showModal" class="modal-overlay">
-      <div class="modal">
-        <h2>Assign Permission</h2>
-        <p>Permission: <strong>{{ selectedPermission.name }}</strong></p>
-
-        <label for="role">Choose Role:</label>
-        <select v-model="selectedRoleId" id="role">
-          <option v-for="role in roles" :value="role.id" :key="role.id">
-            {{ role.name }}
-          </option>
-        </select>
-
-        <div class="modal-actions">
-          <button @click="assignPermission" class="assign-confirm">Assign</button>
-          <button @click="closeModal" class="cancel-btn">Cancel</button>
-        </div>
       </div>
     </div>
   </div>
@@ -69,32 +66,29 @@ export default {
     return {
       permissions: [],
       roles: [],
-      selectedPermission: null,
       selectedRoleId: null,
-      showModal: false,
+      selectedPermissionIds: [],
       token: null,
       currentUser: null,
     };
   },
-mounted() {
-  const rawToken = localStorage.getItem('access_token');
+  mounted() {
+    const rawToken = localStorage.getItem('access_token');
+    try {
+      const parsed = JSON.parse(rawToken);
+      this.token = parsed.access_token;
+    } catch (e) {
+      this.token = rawToken;
+    }
 
-  try {
-    const parsed = JSON.parse(rawToken);
-    this.token = parsed.access_token; // extract only the actual JWT
-  } catch (e) {
-    this.token = rawToken; // fallback if it's already just the token string
-  }
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      this.currentUser = JSON.parse(userData);
+    }
 
-  const userData = localStorage.getItem('user');
-  if (userData) {
-    this.currentUser = JSON.parse(userData);
-  }
-
-  this.fetchPermissions();
-  this.fetchRoles();
-}
-,
+    this.fetchPermissions();
+    this.fetchRoles();
+  },
   methods: {
     async fetchPermissions() {
       try {
@@ -120,17 +114,15 @@ mounted() {
         console.error('Failed to fetch roles:', err);
       }
     },
-    openModal(permission) {
-      this.selectedPermission = permission;
-      this.showModal = true;
-    },
-    closeModal() {
-      this.selectedPermission = null;
-      this.selectedRoleId = null;
-      this.showModal = false;
-    },
-    async assignPermission() {
-      if (!this.selectedRoleId) return alert('Please select a role');
+    async assignPermissions() {
+      if (!this.selectedRoleId) {
+        alert('Please select a role');
+        return;
+      }
+      if (this.selectedPermissionIds.length === 0) {
+        alert('Please select at least one permission');
+        return;
+      }
 
       try {
         const response = await fetch(
@@ -142,37 +134,37 @@ mounted() {
               Authorization: `Bearer ${this.token}`,
             },
             body: JSON.stringify({
-              permission_ids: [this.selectedPermission.id],
+              permission_ids: this.selectedPermissionIds,
             }),
           }
         );
 
         if (!response.ok) throw new Error('Assignment failed');
-        alert('Permission assigned to role successfully');
-        this.closeModal();
+        alert('Permissions assigned to role successfully');
+
+        this.selectedPermissionIds = [];
+        this.selectedRoleId = null;
       } catch (err) {
-        console.error('Error assigning permission:', err);
-        alert('Failed to assign permission');
+        console.error('Error assigning permissions:', err);
+        alert('Failed to assign permissions');
       }
     },
   },
 };
 </script>
 
-
 <style scoped>
 .container {
-  padding: 2rem;
+  padding-top: 2rem;
 }
 .title {
   display: flex;
   font-weight: bold;
-  margin-bottom: 1rem;
+  margin-bottom: 2rem;
   justify-content: space-between;
 }
 .table-wrapper {
   background: #fff;
-  border-radius: 0.75rem;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
   overflow-x: auto;
 }
@@ -201,73 +193,27 @@ mounted() {
   font-family: monospace;
   color: #374151;
 }
-.assign-btn {
-  background-color: #3b82f6;
-  color: white;
-  padding: 0.4rem 0.75rem;
-  border: none;
-  border-radius: 0.375rem;
-  cursor: pointer;
-}
-.assign-btn:hover {
-  background-color: #2563eb;
-}
-
-/* Modal */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.4);
+.bulk-actions {
   display: flex;
   align-items: center;
-  justify-content: center;
-}
-.modal {
-  background: white;
-  padding: 2rem;
-  border-radius: 0.75rem;
-  width: 90%;
-  max-width: 400px;
-}
-.modal h2 {
-  font-size: 1.25rem;
-  margin-bottom: 1rem;
-}
-.modal label {
-  display: block;
-  margin-bottom: 0.5rem;
-}
-.modal select {
-  width: 100%;
-  padding: 0.5rem;
-  border-radius: 0.375rem;
-  margin-bottom: 1rem;
-}
-.modal-actions {
-  display: flex;
-  justify-content: flex-end;
   gap: 1rem;
 }
 .assign-confirm {
-  background: #10b981;
+  background-color: #10b981;
   color: white;
-  padding: 0.5rem 1rem;
+  font-weight: 600;
+  padding: 0.6rem 1.25rem;
   border: none;
-  border-radius: 0.375rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background 0.2s;
 }
-.cancel-btn {
-  background: #ef4444;
-  color: white;
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 0.375rem;
+.assign-confirm:disabled {
+  background-color: #9ca3af;
+  cursor: not-allowed;
 }
-
-.actions {
-  margin-bottom: 1rem;
+.assign-confirm:hover {
+  background-color: #059669;
 }
 .create-btn {
   background-color: yellow;
@@ -278,10 +224,8 @@ mounted() {
   border-radius: 0.5rem;
   cursor: pointer;
   text-decoration: none;
-  align-items: end;
 }
 .create-btn:hover {
   background-color: white;
 }
-
 </style>

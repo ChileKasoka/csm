@@ -50,11 +50,11 @@ export default {
 
 <style scoped>
 .project-detail {
-  max-width: 600px;
+  /* max-width: 600px; */
   margin: 2rem auto;
   padding: 1.8rem 2.4rem;
   background: #fff;
-  border-radius: 12px;
+  /* border-radius: 12px; */
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   color: #333;

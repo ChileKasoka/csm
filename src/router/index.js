@@ -33,7 +33,11 @@ const routes = [
         component: DashboardPage,
         meta: { requiresAuth: true  }
       },
-      { path: 'team', name: 'team', component: TeamPage },
+      { 
+        path: 'team', 
+        name: 'team', 
+        component: TeamPage
+      },
       { 
         path: 'tasks', 
         name: 'tasks', 
@@ -44,7 +48,7 @@ const routes = [
         path: '/roles',
         name: 'roles',
         component: RolesPage,
-        meta: { requiredPermission: 'View Roles' }
+        meta: { requiredPermission: 'Get All Roles' }
       },
       {
         path: '/create-permission',
@@ -58,23 +62,23 @@ const routes = [
         meta: { requiredPermission: 'Assign Permission to Role' }
       },
       {
-        path: 'role-permissions',
+        path: '/role-permissions',
         name: 'RolePermissions',
         component: RolePermissionsPage,
-        meta: { requiredPermission: 'List All Role Permissions' }
+        // meta: { requiredPermission: 'List All Role Permissions' }
       },
       {
         path: 'projects',
         name: 'projects',
         component: ProjectsPage,
-        meta: { requiredPermission: 'Get All Projects' }
+        // meta: { requiredPermission: 'Get All Projects' }
       },
       {
         path: 'projects/:id',
         name: 'ProjectDetail',
         component: ProjectDetail,
         props: true,
-        meta: { requiredPermission: 'Get One Project' }
+        // meta: { requiredPermission: 'Get One Project' }
       },
       {
         path: 'projects/create',

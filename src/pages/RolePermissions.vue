@@ -3,70 +3,111 @@
     <h2 class="page-title">Role Permissions</h2>
 
     <div
-      v-for="(group, index) in groupedPermissions"
-      :key="index"
       class="role-section"
-    > 
-      <h3 class="role-title">{{ group.role_name }}</h3>
+      v-for="(role, index) in groupedPermissions"
+      :key="index"
+    >
+      <h3 class="role-title">{{ role.role_name }}</h3>
 
-      <table class="permissions-table">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Permission</th>
-            <th>Method</th>
-            <!-- <th>Path</th> -->
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(perm, i) in group.permissions" :key="i">
-            <td>{{ i + 1 }}</td>
-            <td>{{ perm.permission_name }}</td>
-            <td>
-              <span :class="['method', perm.method.toLowerCase()]">{{ perm.method }}</span>
-            </td>
-            <!-- <td>{{ perm.path }}</td> -->
-          </tr>
-        </tbody>
-      </table>
+      <div class="permission-badges">
+        <div
+          class="permission-badge"
+          v-for="(perm, pIndex) in role.permissions"
+          :key="pIndex"
+        >
+          {{ perm.permission_name }}
+          <span class="remove-btn" @click="removePermission(role.role_id, perm.permission_id)">✕</span>
+        </div>
+      </div>
+    </div>
+
+    <div v-if="groupedPermissions.length === 0" class="empty-message">
+      No role-permissions found.
     </div>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'RolePermissionsPage',
+  name: "RolePermissions",
   data() {
     return {
-      permissions: [],
+      rawPermissions: [],
+      groupedPermissions: [],
+      token: null,
     };
   },
-  computed: {
-    groupedPermissions() {
-      const map = {};
 
-      for (const perm of this.permissions) {
-        if (!map[perm.role_name]) {
-          map[perm.role_name] = [];
-        }
-        map[perm.role_name].push(perm);
-      }
-
-      return Object.entries(map).map(([role_name, permissions]) => ({
-        role_name,
-        permissions,
-      }));
-    },
-  },
   mounted() {
-    fetch('http://localhost:8080/role-permissions')
-      .then((res) => res.json())
-      .then((data) => {
-        this.permissions = data;
-      })
-      .catch((err) => {
-        console.error('Failed to load permissions:', err);
-      });
+    const rawToken = localStorage.getItem("access_token");
+    try {
+      const parsed = JSON.parse(rawToken);
+      this.token = parsed.access_token;
+    } catch (e) {
+      this.token = rawToken;
+    }
+
+    this.rolePermissions();
+  },
+
+  methods: {
+    async rolePermissions() {
+      try {
+        const res = await fetch("http://localhost:8080/role-permissions", {
+          headers: {
+            Authorization: `Bearer ${this.token}`,
+          },
+        });
+
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        const data = await res.json();
+        this.rawPermissions = Array.isArray(data) ? data : data.data || [];
+
+        const grouped = {};
+        this.rawPermissions.forEach((item) => {
+          const roleKey = `${item.role_id}-${item.role_name}`;
+          if (!grouped[roleKey]) {
+            grouped[roleKey] = {
+              role_id: item.role_id,
+              role_name: item.role_name,
+              permissions: [],
+            };
+          }
+          grouped[roleKey].permissions.push({
+            permission_name: item.permission_name,
+            permission_id: item.permission_id,
+          });
+        });
+
+        this.groupedPermissions = Object.values(grouped);
+      } catch (err) {
+        console.error("Failed to fetch role permissions:", err);
+      }
+    },
+
+    async removePermission(roleId, permissionId) {
+      if (!confirm("Are you sure you want to remove this permission from the role?")) return;
+
+      try {
+        const res = await fetch(
+          `http://localhost:8080/role-permissions/${roleId}/permissions/${permissionId}`,
+          {
+            method: "DELETE",
+            headers: {
+              Authorization: `Bearer ${this.token}`,
+            },
+          }
+        );
+
+        if (!res.ok) throw new Error("Failed to delete permission");
+
+        // Re-fetch updated list
+        this.rolePermissions();
+      } catch (err) {
+        console.error("Error deleting permission:", err);
+        alert("Could not remove permission.");
+      }
+    },
   },
 };
 </script>
@@ -84,6 +125,9 @@ export default {
 
 .role-section {
   margin-bottom: 2rem;
+  background-color: #f9fafb;
+  padding: 1rem;
+  border-radius: 0.5rem;
 }
 
 .role-title {
@@ -93,45 +137,39 @@ export default {
   text-transform: capitalize;
 }
 
-.permissions-table {
-  width: 100%;
-  border-collapse: collapse;
-  background-color: #fff;
-  border: 1px solid #e5e7eb;
+.permission-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
-.permissions-table th,
-.permissions-table td {
-  border: 1px solid #e5e7eb;
-  padding: 0.75rem;
-  text-align: left;
+.permission-badge {
+  background-color: #e0f2fe;
+  color: #0369a1;
+  padding: 0.4rem 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-.permissions-table th {
-  background-color: #f9fafb;
-  font-weight: 500;
-}
-
-.method {
-  font-weight: 600;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  display: inline-block;
-}
-
-.method.get {
-  color: #16a34a;
-}
-
-.method.post {
-  color: #2563eb;
-}
-
-.method.put {
-  color: #ca8a04;
-}
-
-.method.delete {
+.remove-btn {
+  background: transparent;
   color: #dc2626;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1rem;
+  margin-left: 0.25rem;
+}
+
+.remove-btn:hover {
+  color: #b91c1c;
+}
+
+.empty-message {
+  padding: 1rem;
+  font-style: italic;
+  color: #6b7280;
 }
 </style>
