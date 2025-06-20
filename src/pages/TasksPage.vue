@@ -41,18 +41,66 @@
 export default {
   data() {
     return {
-      tasks: []
+      tasks: [],
+      userId: null,
+      role: '',
     };
   },
-  mounted() {
-    this.fetchTasks();
-  },
+mounted() {
+  const storedUser = localStorage.getItem('user');
+  if (storedUser) {
+    const userObj = JSON.parse(storedUser);
+    this.userName = userObj.name || '';
+    this.userId = userObj.id;
+
+    // FIX: Use role.name instead of role_id
+    this.role = userObj.role?.name?.toLowerCase() || '';
+
+    console.log('User Role:', this.role);
+
+    if (this.userName === 'admin') {
+      this.fetchTasks();
+    } else {
+      this.fetchAssignedTasks();
+    }
+  }
+}
+,
   methods: {
+    
     async fetchTasks() {
       const res = await fetch('http://localhost:8080/tasks');
       const data = await res.json();
       this.tasks = data;
     },
+
+async fetchAssignedTasks() {
+  if (!this.userId) return;
+
+  try {
+    const response = await fetch(`http://localhost:8080/user-tasks/${this.userId}`, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+      }
+    });
+
+    const data = await response.json();
+    console.log("Fetched assigned tasks:", data);
+
+    // Normalize task_id to id
+    this.tasks = Array.isArray(data)
+      ? data.map(task => ({
+          ...task,
+          id: task.task_id // unify field
+        }))
+      : [];
+  } catch (error) {
+    console.error('Error fetching assigned tasks:', error);
+  }
+}
+
+,
+    
     async deleteTask(taskId) {
       const confirmed = confirm('Are you sure you want to delete this task?');
       if (!confirmed) return;

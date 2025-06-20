@@ -7,13 +7,16 @@
 
     <section class="cards">
       <div class="card">
-        <h3>Projects</h3>
-        <p class="number">8</p>
+        <div class="card">
+          <h3>Projects in progress</h3>
+          <p class="number">8</p>
+        </div>
+        <div class="card">
+          <h3>Tasks in progess</h3>
+          <p class="number">23</p>
+        </div>
       </div>
-      <div class="card">
-        <h3>Tasks</h3>
-        <p class="number">23</p>
-      </div>
+
       <div class="card">
         <h3>Team Members</h3>
         <p class="number"> {{ teamCount }} </p>
@@ -119,7 +122,7 @@ async fetchAssignedTasks() {
 .cards {
   margin-top: 2rem;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: 1.5rem;
 }
 

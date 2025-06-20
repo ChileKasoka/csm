@@ -1,18 +1,21 @@
 <template>
   <div class="task-detail">
-    <div class="card">
+    <!-- <div class="card"> -->
       <h1>{{ task.title }}</h1>
       <div class="meta">
-        <p><strong>Status:</strong> <span :class="['badge', task.status]">{{ task.status }}</span></p>
+        <br>
+        <p class="description">{{ task.description }}</p>
+        <br>
         <p><strong>Start Date:</strong> {{ formatDate(task.start_date) }}</p>
         <p><strong>End Date:</strong> {{ formatDate(task.end_date) }}</p>
+        <br>
+        <p><strong>Status:</strong> <span :class="['badge', task.status]">{{ task.status }}</span></p>
       </div>
 
-      <br>
-      <p class="description">{{ task.description }}</p>
+
 
       <router-link to="/tasks" class="back-button">← Back to Tasks</router-link>
-    </div>
+    <!-- </div> -->
   </div>
 </template>
 
@@ -54,24 +57,15 @@ export default {
 
 <style scoped>
 .task-detail {
-  display: flex;
-  justify-content: center;
   padding: 2rem;
   font-family: 'Segoe UI', sans-serif;
   background-color: #f9fafb;
   min-height: 100vh;
-}
-
-.card {
-  background: white;
-  padding: 2rem 2.5rem;
-  border-radius: 1rem;
-  max-width: 600px;
   width: 100%;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
 }
 
-.card h1 {
+.task-detail h1 {
   font-size: 2rem;
   margin-bottom: 0.5rem;
   color: #111827;

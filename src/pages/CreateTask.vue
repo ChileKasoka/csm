@@ -8,7 +8,6 @@
         <input v-model="start_date" type="date" required />
         <input v-model="end_date" type="date" required />
 
-        <!-- Project Select Dropdown -->
         <select v-model="project_id" required>
           <option disabled value="">Select Project</option>
           <option v-for="project in projects" :key="project.id" :value="project.id">
@@ -23,8 +22,10 @@
           <option value="completed">Completed</option>
         </select>
 
-        <button type="submit">Create Task</button>
-        <router-link to="/tasks" class="cancel-link">Cancel</router-link>
+        <div class="form-actions">
+          <button type="submit">Create Task</button>
+          <router-link to="/tasks" class="cancel-link">Cancel</router-link>
+        </div>
       </form>
     </div>
   </div>
@@ -40,8 +41,8 @@ export default {
       start_date: '',
       end_date: '',
       status: '',
-      project_id: '', // new
-      projects: []    // new
+      project_id: '',
+      projects: []
     };
   },
   mounted() {
@@ -56,7 +57,6 @@ export default {
         alert('Failed to load projects: ' + err.message);
       }
     },
-
     async createTask() {
       const payload = {
         title: this.title,
@@ -92,54 +92,88 @@ export default {
 .create-task-page {
   display: flex;
   justify-content: center;
-  padding: 2rem;
+  padding-top: 2rem;
 }
 
 .form-container {
-  background: white;
-  padding: 2rem;
-  border-radius: 1rem;
-  max-width: 500px;
+  background-color: #ffffff;
+  padding-top: 2rem;
   width: 100%;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
 }
 
-h2 {
-  margin-bottom: 1rem;
+.form-container h2 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin: 1.5rem;
+  color: #1f2937;
 }
 
 form {
   display: flex;
   flex-direction: column;
+  gap: 1rem;
 }
 
 input,
 textarea,
 select {
-  margin-bottom: 1rem;
   padding: 0.75rem;
+  margin: 1rem;
+  font-size: 1rem;
+  border: 1px solid #d1d5db;
   border-radius: 0.5rem;
-  border: 1px solid #ccc;
+  background-color: #f9fafb;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+}
+
+.form-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 1rem;
 }
 
 button {
+  flex: 1;
   padding: 0.75rem;
   background-color: #2563eb;
   color: white;
   border: none;
   border-radius: 0.5rem;
-  cursor: pointer;
   font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s;
 }
 
 button:hover {
-  background-color: #1e40af;
+  background-color: #1d4ed8;
 }
 
 .cancel-link {
-  margin-top: 1rem;
-  display: inline-block;
-  color: #6b7280;
-  text-decoration: underline;
+  flex: 1;
+  text-align: center;
+  background-color: #9ca3af;
+  color: white;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  text-decoration: none;
+  transition: background-color 0.3s;
+}
+
+.cancel-link:hover {
+  background-color: #6b7280;
 }
 </style>

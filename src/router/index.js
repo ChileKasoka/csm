@@ -20,6 +20,7 @@ import EditProject from '@/pages/EditProject.vue';
 import AddUser from '@/pages/AddUser.vue';
 import AssignUsersToTask from '@/pages/AssignUsersToTask.vue';
 import CreatePermission from '@/pages/CreatePermission.vue';
+import AssignUsersToProject from '@/pages/AssignUsersToProject.vue';
 
 const routes = [
   {
@@ -97,7 +98,7 @@ const routes = [
         name: 'TaskDetail',
         component: TaskDetail,
         props: true,
-        meta: { requiredPermission: 'View Task' }
+        meta: { requiredPermission: 'Get My Task By ID' }
       },
       {
         path: 'tasks/create',
@@ -122,6 +123,11 @@ const routes = [
         name: 'AssignUsersToTask',
         component: AssignUsersToTask,
         meta: { requiredPermission: 'Assign Users to Task' }
+      },
+      {
+        path: '/user-project/:id/assign-users',
+        name: 'AssignUsersToProject',
+        component: AssignUsersToProject,
       },
       {
         path: 'settings',

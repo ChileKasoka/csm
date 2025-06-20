@@ -11,8 +11,10 @@
         <option value="active">Active</option>
         <option value="completed">Completed</option>
       </select>
-      <button type="submit">Create Project</button>
-      <router-link to="/projects" class="cancel-link">Cancel</router-link>
+      <div class="form-actions">
+        <button type="submit">Create Project</button>
+        <router-link to="/projects" class="cancel-link">Cancel</router-link>
+      </div>
     </form>
   </div>
 </template>
@@ -58,39 +60,93 @@ export default {
 
 <style scoped>
 .project-create-page {
-  max-width: 600px;
   margin: 2rem auto;
-  background: white;
+  background: #ffffff;
   padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
 }
+
+.project-create-page h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  color: #1f2937;
+}
+
 .project-form {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.25rem;
 }
+
 .project-form input,
 .project-form select {
-  padding: 0.5rem;
+  padding: 0.75rem 1rem;
   font-size: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  background-color: #f9fafb;
+  transition: border-color 0.2s, background-color 0.2s;
 }
+
+.project-form input:focus,
+.project-form select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  background-color: #fff;
+}
+
 .project-form button {
-  background-color: #2563eb;
-  color: white;
-  padding: 0.6rem;
-  font-weight: bold;
+  background-color: #3b82f6;
+  color: #ffffff;
+  padding: 0.75rem;
+  font-size: 1rem;
+  font-weight: 600;
   border: none;
-  border-radius: 6px;
+  border-radius: 12px;
   cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.project-form button:hover {
+  background-color: #2563eb;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.form-actions button {
+  flex: 1;
+  background-color: #e8e141;
+  color: black;
+}
+
+.form-actions button:hover {
+  background-color: #848484;
+  color: white;
 }
 
 .cancel-link {
-  margin-top: 1rem;
+  flex: 1;
   display: inline-block;
-  color: #6b7280;
-  text-decoration: underline;
+  text-align: center;
+  padding: 0.65rem;
+  background-color: #9ca3af;
+  color: white;
+  border-radius: 12px;
+  text-decoration: none;
+  transition: background-color 0.3s;
 }
+
+.cancel-link:hover {
+  background-color: #ced0d4;
+}
+
 </style>
+

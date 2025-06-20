@@ -12,31 +12,63 @@
       </div>
     </header>
 
-    <section class="team-list">
-      <div
-        v-for="(member, index) in team"
-        :key="index"
-        class="team-card"
-        @click="openEditModal(member)"
-      >
+    <!-- Tabs -->
+    <div class="tabs">
+      <button :class="{ active: activeTab === 'assigned' }" @click="activeTab = 'assigned'">Assigned to Projects</button>
+      <button :class="{ active: activeTab === 'all' }" @click="activeTab = 'all'">All Team Members</button>
+    </div>
+
+    <!-- Assigned View (Unchanged) -->
+    <section v-if="activeTab == 'assigned'" class="team-list">
+      <div v-for="(member, index) in teamProjects" :key="index" class="team-card" @click="openEditModal(member)">
         <h3>{{ member.name }}</h3>
         <p>{{ member.email }}</p>
         <span class="role">{{ member.role }}</span>
         <div class="actions">
           <div class="icon-group">
-            <font-awesome-icon
-              icon="edit"
-              class="icon edit"
-              @click.stop="openEditModal(member)"
-            />
-            <font-awesome-icon
-              icon="trash"
-              class="icon delete"
-              @click.stop="deleteMember(member.id)"
-            />
+            <font-awesome-icon icon="edit" class="icon edit" @click.stop="openEditModal(member)" />
+            <font-awesome-icon icon="trash" class="icon delete" @click.stop="deleteMember(member.id)" />
           </div>
         </div>
       </div>
+    </section>
+
+    <!-- All Users Table -->
+    <section v-if="activeTab === 'all'">
+      <table class="team-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <template v-for="(member, index) in team" :key="index">
+            <tr @click="toggleUserProjects(member.id)" style="cursor: pointer;">
+              <td>{{ member.name }}</td>
+              <td>{{ member.email }}</td>
+              <td>{{ member.role }}</td>
+              <td>
+                <font-awesome-icon icon="edit" class="icon edit" @click.stop="openEditModal(member)" />
+                <font-awesome-icon icon="trash" class="icon delete" @click.stop="deleteMember(member.id)" />
+              </td>
+            </tr>
+
+            <!-- Expanded Row -->
+            <tr v-if="expandedUserId === member.id">
+              <td colspan="4" class="expanded-row">
+                <div v-if="loadingUserId === member.id">🔄 Loading projects...</div>
+                <ul v-else-if="userProjectMap[member.id]?.length">
+                  <li v-for="(proj, i) in userProjectMap[member.id]" :key="i">📁 {{ proj.name }}</li>
+                </ul>
+                <p v-else>No projects assigned.</p>
+              </td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
     </section>
 
     <!-- Edit Modal -->
@@ -47,13 +79,7 @@
         <input v-model="selectedUser.email" placeholder="Email" />
         <select v-model="selectedUser.role_id">
           <option disabled value="">Select Role</option>
-          <option
-            v-for="role in roles"
-            :key="role.id"
-            :value="role.id"
-          >
-            {{ role.name }}
-          </option>
+          <option v-for="role in roles" :key="role.id" :value="role.id">{{ role.name }}</option>
         </select>
         <div class="modal-actions">
           <button @click="updateUser" class="submit-btn">Save</button>
@@ -66,12 +92,16 @@
 
 <script>
 export default {
-  name: 'TeamPage',
   data() {
     return {
       team: [],
+      teamProjects: [],
       roles: [],
       selectedUser: null,
+      activeTab: 'assigned',
+      expandedUserId: null,
+      userProjectMap: {},
+      loadingUserId: null,
     };
   },
   methods: {
@@ -100,12 +130,56 @@ export default {
           name: user.name,
           email: user.email,
           role: user.role?.name || 'N/A',
-          role_id: user.role?.id || null,
+          role_id: user.role?.id || null
         }));
       } catch (err) {
         console.error('Error loading team:', err);
       }
     },
+    async fetchTeamProjects() {
+      try {
+        const token = localStorage.getItem('access_token');
+        const res = await fetch('http://localhost:8080/user-projects', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error('Failed to fetch user-projects');
+        const data = await res.json();
+        this.teamProjects = data.map(user => ({
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role?.name || 'N/A',
+          role_id: user.role?.id || null,
+        }));
+      } catch (err) {
+        console.error('Error loading team projects:', err);
+      }
+    },
+async toggleUserProjects(userId) {
+  this.expandedUserId = this.expandedUserId === userId ? null : userId;
+
+  // Always re-fetch in case data changed
+  this.loadingUserId = userId;
+
+  try {
+    const token = localStorage.getItem('access_token');
+    const res = await fetch(`http://localhost:8080/user-projects/${userId}/projects`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    if (!res.ok) throw new Error('Failed to fetch user projects');
+
+    const data = await res.json();
+    console.log("Fetched projects for", userId, data);
+    this.userProjectMap[userId] = Array.isArray(data) ? data : [];
+  } catch (err) {
+    console.error('Error fetching user projects:', err);
+    this.userProjectMap[userId] = [];
+  } finally {
+    this.loadingUserId = null;
+  }
+}
+,
     openEditModal(user) {
       this.selectedUser = { ...user };
     },
@@ -157,6 +231,7 @@ export default {
   mounted() {
     this.fetchTeam();
     this.fetchRoles();
+    this.fetchTeamProjects();
   }
 };
 </script>
@@ -398,5 +473,101 @@ select:focus {
 
 .cancel-btn:hover {
   background-color: #f3f4f6;
+}
+
+.tabs {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  justify-content: center;
+}
+.tabs button {
+  padding: 0.6rem 1.4rem;
+  border-radius: 999px;
+  border: none;
+  background: #f1f5f9;
+  color: #374151;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+}
+.tabs button.active {
+  background: #1f2937;
+  color: #fff;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.team-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 0.5rem;
+  margin-top: 1rem;
+  background-color: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+.team-table th, .team-table td {
+  padding: 1rem;
+  text-align: left;
+}
+.team-table thead {
+  background-color: #f9fafb;
+}
+.team-table tbody tr {
+  background-color: #ffffff;
+  transition: background-color 0.2s;
+}
+.team-table tbody tr:hover {
+  background-color: #f3f4f6;
+}
+.team-table th {
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-weight: 700;
+  border-bottom: 1px solid #e5e7eb;
+}
+.team-table td {
+  font-size: 0.95rem;
+  color: #374151;
+  vertical-align: middle;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.icon.edit {
+  color: #3b82f6;
+  margin-right: 10px;
+  cursor: pointer;
+}
+.icon.delete {
+  color: #ef4444;
+  cursor: pointer;
+}
+
+.role {
+  display: inline-block;
+  margin-top: 0.5rem;
+  padding: 0.3rem 0.6rem;
+  background: #facc15;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: bold;
+  color: #1f2937;
+}
+
+.expanded-row {
+  background-color: #f9fafb;
+  padding: 1rem;
+  font-size: 0.9rem;
+  color: #374151;
+}
+.expanded-row ul {
+  list-style: none;
+  padding-left: 1rem;
+  margin: 0;
+}
+.expanded-row li {
+  padding: 0.3rem 0;
 }
 </style>

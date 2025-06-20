@@ -108,15 +108,13 @@ export default {
 .add-user-wrapper {
   display: flex;
   justify-content: center;
-  padding: 2rem;
+  padding-top: 2rem;
 }
 
 .form-card {
   background: #ffffff;
   padding: 2rem;
-  border-radius: 16px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
-  max-width: 500px;
   width: 100%;
 }
 
