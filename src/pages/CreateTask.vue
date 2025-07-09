@@ -53,7 +53,7 @@ export default {
   methods: {
     async fetchProjects() {
       try {
-        const res = await fetch('http://API_BASE_URL/projects');
+        const res = await fetch(`${API_BASE_URL}/projects`);
         this.projects = await res.json();
       } catch (err) {
         alert('Failed to load projects: ' + err.message);
@@ -70,7 +70,7 @@ export default {
       };
 
       try {
-        const res = await fetch('http://API_BASE_URL/tasks', {
+        const res = await fetch(`${API_BASE_URL}/tasks`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)

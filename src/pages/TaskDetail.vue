@@ -35,7 +35,7 @@ export default {
   methods: {
     async fetchTask() {
       const id = this.$route.params.id;
-      const res = await fetch(`http://API_BASE_URL/tasks/${id}`);
+      const res = await fetch(`${API_BASE_URL}/tasks/${id}`);
       if (res.ok) {
         this.task = await res.json();
       } else {

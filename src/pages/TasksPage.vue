@@ -71,7 +71,7 @@ mounted() {
   methods: {
     
     async fetchTasks() {
-      const res = await fetch('http://API_BASE_URL/tasks');
+      const res = await fetch(`${API_BASE_URL}/tasks`);
       const data = await res.json();
       this.tasks = data;
     },
@@ -80,7 +80,7 @@ async fetchAssignedTasks() {
   if (!this.userId) return;
 
   try {
-    const response = await fetch(`http://API_BASE_URL/user-tasks/${this.userId}`, {
+    const response = await fetch(`API_BASE_URL/user-tasks/${this.userId}`, {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('access_token')}`
       }

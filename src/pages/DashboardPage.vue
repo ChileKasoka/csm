@@ -67,7 +67,7 @@ export default {
   methods: {
     async fetchTeamCount() {
       try {
-        const response = await fetch('http://API_BASE_URL/users/count', {
+        const response = await fetch(`${API_BASE_URL}/users/count`, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('access_token')}`
           }
@@ -83,7 +83,7 @@ async fetchAssignedTasks() {
   if (!this.userId) return;
 
   try {
-    const response = await fetch(`http://API_BASE_URL/user-tasks/${this.userId}`, {
+    const response = await fetch(`${API_BASE_URL}/user-tasks/${this.userId}`, {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('access_token')}`
       }

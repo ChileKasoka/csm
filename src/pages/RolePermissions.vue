@@ -55,7 +55,7 @@ export default {
   methods: {
     async rolePermissions() {
       try {
-        const res = await fetch("http://API_BASE_URL/role-permissions", {
+        const res = await fetch(`${API_BASE_URL}/role-permissions`, {
           headers: {
             Authorization: `Bearer ${this.token}`,
           },
@@ -92,7 +92,7 @@ export default {
 
       try {
         const res = await fetch(
-          `http://API_BASE_URL/role-permissions/${roleId}/permissions/${permissionId}`,
+          `${API_BASE_URL}/role-permissions/${roleId}/permissions/${permissionId}`,
           {
             method: "DELETE",
             headers: {

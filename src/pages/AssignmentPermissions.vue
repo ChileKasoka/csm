@@ -95,7 +95,7 @@ export default {
   methods: {
     async fetchPermissions() {
       try {
-        const res = await fetch('http://API_BASE_URL/permissions', {
+        const res = await fetch(`${API_BASE_URL}/permissions`, {
           headers: {
             Authorization: `Bearer ${this.token}`,
           },
@@ -107,7 +107,7 @@ export default {
     },
     async fetchRoles() {
       try {
-        const res = await fetch('http://API_BASE_URL/roles', {
+        const res = await fetch(`${API_BASE_URL}/roles`, {
           headers: {
             Authorization: `Bearer ${this.token}`,
           },
@@ -129,7 +129,7 @@ export default {
 
       try {
         const response = await fetch(
-          `http://API_BASE_URL/role-permissions/${this.selectedRoleId}`,
+          `${API_BASE_URL}/role-permissions/${this.selectedRoleId}`,
           {
             method: 'POST',
             headers: {

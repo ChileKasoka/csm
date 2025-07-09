@@ -41,7 +41,7 @@ export default {
   methods: {
     async fetchUsers() {
       try {
-        const res = await fetch("http://API_BASE_URL/users", {
+        const res = await fetch(`${API_BASE_URL}/users`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("access_token")}`,
           },
@@ -58,7 +58,7 @@ export default {
       }
 
       try {
-        const response = await fetch(`http://API_BASE_URL/user-projects/${this.projectId}/many`, {
+        const response = await fetch(`${API_BASE_URL}/user-projects/${this.projectId}/many`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

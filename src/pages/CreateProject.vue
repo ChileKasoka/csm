@@ -43,7 +43,7 @@ export default {
         end_date: new Date(this.project.end_date + 'T00:00:00Z').toISOString()
       };
 
-      const response = await fetch('http://API_BASE_URL/projects', {
+      const response = await fetch(`${API_BASE_URL}/projects`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)

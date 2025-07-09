@@ -68,7 +68,7 @@ export default {
   },
   methods: {
     async fetchProjects() {
-      const res = await fetch('http://API_BASE_URL/projects');
+      const res = await fetch(`${API_BASE_URL}/projects`);
       this.projects = await res.json();
     },
     formatDate(dateStr) {
@@ -84,7 +84,7 @@ export default {
     },
     async deleteProject(id) {
       if (confirm('Are you sure you want to delete this project?')) {
-        await fetch(`http://API_BASE_URL/projects/${id}`, {
+        await fetch(`${API_BASE_URL}/projects/${id}`, {
           method: 'DELETE'
         });
         this.fetchProjects();
