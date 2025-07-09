@@ -25,8 +25,6 @@
 
 <script>
 
-const API_BASE_URL = process.env.VUE_APP_BASE_URL || 'http://localhost:8080';
-
 export default {
   data() {
     return {
@@ -40,6 +38,8 @@ export default {
     async handleLogin() {
       this.errorMessage = "";
       this.loading = true;
+
+      const API_BASE_URL = process.env.VUE_APP_BASE_URL || 'http://localhost:8080';
 
       try {
         await new Promise((resolve) => setTimeout(resolve, 1000));
