@@ -63,7 +63,7 @@
                 <ul v-else-if="userProjectMap[member.id]?.length">
                   <li v-for="(proj, i) in userProjectMap[member.id]" :key="i">📁 {{ proj.name }}</li>
                 </ul>
-                <p v-else>No projects assigned.</p>
+                <p v-else>No Projects Assigned.</p>
               </td>
             </tr>
           </template>
