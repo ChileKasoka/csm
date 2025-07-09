@@ -40,6 +40,8 @@
 </template>
 
 <script>
+const API_BASE_URL = process.env.VUE_APP_BASE_URL || 'http://localhost:8080';
+
 export default {
   data() {
     return {
@@ -58,7 +60,7 @@ export default {
   methods: {
 async fetchTask() {
   try {
-    const res = await fetch(`http://localhost:8080/tasks/${this.$route.params.id}`);
+    const res = await fetch(`http://API_BASE_URL/tasks/${this.$route.params.id}`);
     const data = await res.json();
 
     this.task = {
@@ -79,7 +81,7 @@ async updateTask() {
     end_date: new Date(this.task.end_date + 'T00:00:00Z').toISOString()
   };
 
-  const res = await fetch(`http://localhost:8080/tasks/${this.$route.params.id}`, {
+  const res = await fetch(`http://API_BASE_URL/tasks/${this.$route.params.id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(updatedTask)

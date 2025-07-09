@@ -91,6 +91,8 @@
 </template>
 
 <script>
+const API_BASE_URL = process.env.VUE_APP_BASE_URL || 'http://localhost:8080';
+
 export default {
   data() {
     return {
@@ -108,7 +110,7 @@ export default {
     async fetchRoles() {
       try {
         const token = localStorage.getItem('access_token');
-        const res = await fetch('http://localhost:8080/roles', {
+        const res = await fetch('http://API_BASE_URL/roles', {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (!res.ok) throw new Error('Failed to fetch roles');
@@ -120,7 +122,7 @@ export default {
     async fetchTeam() {
       try {
         const token = localStorage.getItem('access_token');
-        const res = await fetch('http://localhost:8080/users', {
+        const res = await fetch('http://API_BASE_URL/users', {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (!res.ok) throw new Error('Failed to fetch users');
@@ -139,7 +141,7 @@ export default {
     async fetchTeamProjects() {
       try {
         const token = localStorage.getItem('access_token');
-        const res = await fetch('http://localhost:8080/user-projects', {
+        const res = await fetch('http://API_BASE_URL/user-projects', {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (!res.ok) throw new Error('Failed to fetch user-projects');
@@ -163,7 +165,7 @@ async toggleUserProjects(userId) {
 
   try {
     const token = localStorage.getItem('access_token');
-    const res = await fetch(`http://localhost:8080/user-projects/${userId}/projects`, {
+    const res = await fetch(`http://API_BASE_URL/user-projects/${userId}/projects`, {
       headers: { Authorization: `Bearer ${token}` },
     });
 
@@ -185,7 +187,7 @@ async toggleUserProjects(userId) {
     },
     async updateUser() {
       try {
-        const res = await fetch(`http://localhost:8080/users/${this.selectedUser.id}`, {
+        const res = await fetch(`http://API_BASE_URL/users/${this.selectedUser.id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -217,7 +219,7 @@ async toggleUserProjects(userId) {
       if (!confirm('Are you sure you want to delete this user?')) return;
       try {
         const token = localStorage.getItem('access_token');
-        const res = await fetch(`http://localhost:8080/users/${userId}`, {
+        const res = await fetch(`http://API_BASE_URL/users/${userId}`, {
           method: 'DELETE',
           headers: { Authorization: `Bearer ${token}` }
         });

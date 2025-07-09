@@ -25,6 +25,8 @@
 </template>
 
 <script>
+const API_BASE_URL = process.env.VUE_APP_BASE_URL || 'http://localhost:8080';
+
 export default {
   name: 'AssignUsersToTask',
   data() {
@@ -47,7 +49,7 @@ export default {
   methods: {
     async fetchTask() {
       try {
-        const res = await fetch(`http://localhost:8080/tasks/${this.taskId}`);
+        const res = await fetch(`http://API_BASE_URL/tasks/${this.taskId}`);
         if (!res.ok) throw new Error('Failed to fetch task');
         this.task = await res.json();
       } catch (error) {
@@ -57,7 +59,7 @@ export default {
     },
     async fetchUsers() {
       try {
-        const res = await fetch('http://localhost:8080/users');
+        const res = await fetch('http://API_BASE_URL/users');
         if (!res.ok) throw new Error('Failed to fetch users');
         this.users = await res.json();
       } catch (error) {
@@ -72,7 +74,7 @@ export default {
       this.message = '';
 
       try {
-        const res = await fetch(`http://localhost:8080/tasks/${this.taskId}/assign-users`, {
+        const res = await fetch(`http://API_BASE_URL/tasks/${this.taskId}/assign-users`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ task_id: this.taskId, user_ids: this.selectedUserIds })

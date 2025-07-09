@@ -20,6 +20,8 @@
 </template>
 
 <script>
+const API_BASE_URL = process.env.VUE_APP_BASE_URL || 'http://localhost:8080';
+
 export default {
   name: 'EditProject',
   data() {
@@ -38,7 +40,7 @@ export default {
   },
   methods: {
     async fetchProject() {
-      const res = await fetch(`http://localhost:8080/projects/${this.$route.params.id}`);
+      const res = await fetch(`http://API_BASE_URL/projects/${this.$route.params.id}`);
       if (!res.ok) {
         alert('Failed to fetch project.');
         this.$router.push('/projects');
@@ -60,7 +62,7 @@ export default {
         end_date: new Date(this.project.end_date + 'T00:00:00Z').toISOString()
       };
 
-      const res = await fetch(`http://localhost:8080/projects/${this.$route.params.id}`, {
+      const res = await fetch(`http://API_BASE_URL/projects/${this.$route.params.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formattedProject)

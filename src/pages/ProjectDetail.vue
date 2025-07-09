@@ -68,6 +68,8 @@
 </template>
 
 <script>
+const API_BASE_URL = process.env.VUE_APP_BASE_URL || 'http://localhost:8080';
+
 export default {
   name: 'ProjectDetail',
   props: ['id'],
@@ -97,7 +99,7 @@ export default {
   },
   async created() {
     try {
-      const res = await fetch(`http://localhost:8080/projects/${this.id}`);
+      const res = await fetch(`http://API_BASE_URL/projects/${this.id}`);
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
       this.project = await res.json();
     } catch (err) {

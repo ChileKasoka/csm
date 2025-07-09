@@ -27,6 +27,8 @@
 </template>
 
 <script>
+const API_BASE_URL = process.env.VUE_APP_BASE_URL || 'http://localhost:8080';
+
 export default {
   name: 'CreatePermission',
   data() {
@@ -51,7 +53,7 @@ export default {
   methods: {
     async createPermission() {
       try {
-        const response = await fetch('http://localhost:8080/permissions', {
+        const response = await fetch('http://API_BASE_URL/permissions', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

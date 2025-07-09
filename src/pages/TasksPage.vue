@@ -38,6 +38,8 @@
 </template>
 
 <script>
+const API_BASE_URL = process.env.VUE_APP_BASE_URL || 'http://localhost:8080';
+
 export default {
   data() {
     return {
@@ -69,7 +71,7 @@ mounted() {
   methods: {
     
     async fetchTasks() {
-      const res = await fetch('http://localhost:8080/tasks');
+      const res = await fetch('http://API_BASE_URL/tasks');
       const data = await res.json();
       this.tasks = data;
     },
@@ -78,7 +80,7 @@ async fetchAssignedTasks() {
   if (!this.userId) return;
 
   try {
-    const response = await fetch(`http://localhost:8080/user-tasks/${this.userId}`, {
+    const response = await fetch(`http://API_BASE_URL/user-tasks/${this.userId}`, {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('access_token')}`
       }
@@ -105,7 +107,7 @@ async fetchAssignedTasks() {
       const confirmed = confirm('Are you sure you want to delete this task?');
       if (!confirmed) return;
 
-      const res = await fetch(`http://localhost:8080/tasks/${taskId}`, {
+      const res = await fetch(`http://API_BASE_URL/tasks/${taskId}`, {
         method: 'DELETE'
       });
 

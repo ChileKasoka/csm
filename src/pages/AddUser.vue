@@ -37,6 +37,9 @@
 </template>
 
 <script>
+
+const API_BASE_URL = process.env.VUE_APP_BASE_URL || 'http://localhost:8080';
+
 export default {
   name: 'AddUser',
   data() {
@@ -56,7 +59,7 @@ export default {
     async fetchRoles() {
       try {
         const token = localStorage.getItem('access_token');
-        const res = await fetch('http://localhost:8080/roles', {
+        const res = await fetch('http://API_BASE_URL/roles', {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (!res.ok) throw new Error('Failed to fetch roles');
@@ -68,7 +71,7 @@ export default {
     async handleAddUser() {
       if (this.newUser.name && this.newUser.email && this.newUser.role_id) {
         try {
-          const response = await fetch('http://localhost:8080/users', {
+          const response = await fetch('http://API_BASE_URL/users', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

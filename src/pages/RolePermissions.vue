@@ -28,6 +28,8 @@
 </template>
 
 <script>
+const API_BASE_URL = process.env.VUE_APP_BASE_URL || 'http://localhost:8080';
+
 export default {
   name: "RolePermissions",
   data() {
@@ -53,7 +55,7 @@ export default {
   methods: {
     async rolePermissions() {
       try {
-        const res = await fetch("http://localhost:8080/role-permissions", {
+        const res = await fetch("http://API_BASE_URL/role-permissions", {
           headers: {
             Authorization: `Bearer ${this.token}`,
           },
@@ -90,7 +92,7 @@ export default {
 
       try {
         const res = await fetch(
-          `http://localhost:8080/role-permissions/${roleId}/permissions/${permissionId}`,
+          `http://API_BASE_URL/role-permissions/${roleId}/permissions/${permissionId}`,
           {
             method: "DELETE",
             headers: {

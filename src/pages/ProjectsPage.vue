@@ -40,6 +40,8 @@
 <script>
 import { hasPermission } from '@/utils/permissions';
 
+const API_BASE_URL = process.env.VUE_APP_BASE_URL || 'http://localhost:8080';
+
 
 export default {
   name: 'ProjectsPage',
@@ -66,7 +68,7 @@ export default {
   },
   methods: {
     async fetchProjects() {
-      const res = await fetch('http://localhost:8080/projects');
+      const res = await fetch('http://API_BASE_URL/projects');
       this.projects = await res.json();
     },
     formatDate(dateStr) {
@@ -82,7 +84,7 @@ export default {
     },
     async deleteProject(id) {
       if (confirm('Are you sure you want to delete this project?')) {
-        await fetch(`http://localhost:8080/projects/${id}`, {
+        await fetch(`http://API_BASE_URL/projects/${id}`, {
           method: 'DELETE'
         });
         this.fetchProjects();

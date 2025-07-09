@@ -38,6 +38,8 @@
 </template>
 
 <script>
+const API_BASE_URL = process.env.VUE_APP_BASE_URL || 'http://localhost:8080';
+
 export default {
   name: 'DashboardPage',
 
@@ -65,7 +67,7 @@ export default {
   methods: {
     async fetchTeamCount() {
       try {
-        const response = await fetch('http://localhost:8080/users/count', {
+        const response = await fetch('http://API_BASE_URL/users/count', {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('access_token')}`
           }
@@ -81,7 +83,7 @@ async fetchAssignedTasks() {
   if (!this.userId) return;
 
   try {
-    const response = await fetch(`http://localhost:8080/user-tasks/${this.userId}`, {
+    const response = await fetch(`http://API_BASE_URL/user-tasks/${this.userId}`, {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('access_token')}`
       }

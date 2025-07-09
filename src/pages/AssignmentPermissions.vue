@@ -60,6 +60,9 @@
 </template>
 
 <script>
+const API_BASE_URL = process.env.VUE_APP_BASE_URL || 'http://localhost:8080';
+
+
 export default {
   name: 'AssignmentPermissions',
   data() {
@@ -92,7 +95,7 @@ export default {
   methods: {
     async fetchPermissions() {
       try {
-        const res = await fetch('http://localhost:8080/permissions', {
+        const res = await fetch('http://API_BASE_URL/permissions', {
           headers: {
             Authorization: `Bearer ${this.token}`,
           },
@@ -104,7 +107,7 @@ export default {
     },
     async fetchRoles() {
       try {
-        const res = await fetch('http://localhost:8080/roles', {
+        const res = await fetch('http://API_BASE_URL/roles', {
           headers: {
             Authorization: `Bearer ${this.token}`,
           },
@@ -126,7 +129,7 @@ export default {
 
       try {
         const response = await fetch(
-          `http://localhost:8080/role-permissions/${this.selectedRoleId}`,
+          `http://API_BASE_URL/role-permissions/${this.selectedRoleId}`,
           {
             method: 'POST',
             headers: {

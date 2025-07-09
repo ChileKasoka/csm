@@ -24,6 +24,8 @@
 </template>
 
 <script>
+const API_BASE_URL = process.env.VUE_APP_BASE_URL || 'http://localhost:8080';
+
 export default {
   name: "AssignUsersToProject",
   data() {
@@ -39,7 +41,7 @@ export default {
   methods: {
     async fetchUsers() {
       try {
-        const res = await fetch("http://localhost:8080/users", {
+        const res = await fetch("http://API_BASE_URL/users", {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("access_token")}`,
           },
@@ -56,7 +58,7 @@ export default {
       }
 
       try {
-        const response = await fetch(`http://localhost:8080/user-projects/${this.projectId}/many`, {
+        const response = await fetch(`http://API_BASE_URL/user-projects/${this.projectId}/many`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

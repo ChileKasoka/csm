@@ -20,6 +20,8 @@
 </template>
 
 <script>
+const API_BASE_URL = process.env.VUE_APP_BASE_URL || 'http://localhost:8080';
+
 export default {
   name: 'TaskDetail',
   data() {
@@ -33,7 +35,7 @@ export default {
   methods: {
     async fetchTask() {
       const id = this.$route.params.id;
-      const res = await fetch(`http://localhost:8080/tasks/${id}`);
+      const res = await fetch(`http://API_BASE_URL/tasks/${id}`);
       if (res.ok) {
         this.task = await res.json();
       } else {
