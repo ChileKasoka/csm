@@ -2,38 +2,56 @@
   <div class="projects-page">
     <header class="page-header">
       <div>
-        <h1>📁 Projects</h1>
-        <p>Manage your active and archived projects.</p>
+        <h1>Projects</h1>
+        <br>
+        <p>Manage your projects.</p>
       </div>
       <div>
       <div v-if="canCreateProject">
-        <router-link to="/projects/create" class="create-btn">+ New Project</router-link>
+        <router-link to="/projects/create" class="create-btn">New Project</router-link>
       </div>
       </div>
     </header>
 
-    <section class="project-list">
-      <div class="project-card" v-for="project in projects" :key="project.id">
-        <router-link :to="`/projects/${project.id}`">
-          <h3>{{ project.name }}</h3>
-          <p>{{ project.description }}</p>
-          <p><strong>Start:</strong> {{ formatDate(project.start_date) }}</p>
-          <p class="time"><strong>End:</strong> {{ formatDate(project.end_date) }}</p>
-          <span class="status" :class="project.status">{{ project.status }}</span>
-        </router-link>
+    <hr>
+<section class="project-list">
+  <!-- Loading state -->
+  <div v-if="isLoading" class="loading-message">
+    🔄 Loading projects...
+  </div>
 
-        <div class="actions">
-          <div class="icon-group">
-            <div v-if="canEditProject">
-              <font-awesome-icon icon="edit" class="icon edit" @click="editProject(project)" />
-            </div>
-            <div v-if="canDeleteProject">
-              <font-awesome-icon icon="trash" class="icon delete" @click="deleteProject(project.id)" />
-            </div>
-          </div>
+  <!-- No projects -->
+  <div v-else-if="projects.length === 0" class="no-projects">
+    🚧 No available projects assigned.
+  </div>
+
+  <!-- Project cards -->
+  <div v-else
+       class="project-card"
+       v-for="project in projects"
+       :key="project.id">
+    <router-link :to="`/projects/${project.id}`">
+      <h3>{{ project.name }}</h3>
+      <p>{{ project.description }}</p>
+      <p><strong>Start:</strong> {{ formatDate(project.start_date) }}</p>
+      <p class="time"><strong>End:</strong> {{ formatDate(project.end_date) }}</p>
+      <span class="status" :class="project.status">{{ project.status }}</span>
+    </router-link>
+
+    <div class="actions">
+      <div class="icon-group">
+        <div v-if="canEditProject">
+          <font-awesome-icon icon="edit" class="icon edit" @click="editProject(project)" />
+        </div>
+        <div v-if="canDeleteProject">
+          <font-awesome-icon icon="trash" class="icon delete" @click="deleteProject(project.id)" />
         </div>
       </div>
-    </section>
+    </div>
+  </div>
+</section>
+
+
   </div>
 </template>
 
@@ -47,7 +65,8 @@ export default {
   name: 'ProjectsPage',
   data() {
     return {
-      projects: []
+      projects: [],
+      isLoading: true,
     };
   },
   mounted() {
@@ -67,10 +86,29 @@ export default {
     }
   },
   methods: {
-    async fetchProjects() {
-      const res = await fetch(`${API_BASE_URL}/projects`);
-      this.projects = await res.json();
-    },
+async fetchProjects() {
+  this.isLoading = true;
+
+  const startTime = Date.now();
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/projects`);
+    const data = await res.json();
+    this.projects = Array.isArray(data) ? data : [];
+  } catch (err) {
+    console.error('Error fetching projects:', err);
+    this.projects = [];
+  } finally {
+    // Ensure at least 500ms loading time
+    const elapsed = Date.now() - startTime;
+    const delay = Math.max(0, 500 - elapsed);
+    setTimeout(() => {
+      this.isLoading = false;
+    }, delay);
+  }
+}
+
+,
     formatDate(dateStr) {
       if (!dateStr || dateStr.startsWith('0001')) return '—';
       const date = new Date(dateStr);
@@ -227,4 +265,15 @@ export default {
 .icon.delete {
   color: #000000;
 }
+
+.no-projects {
+  font-size: 1rem;
+  color: #6b7280;
+  background-color: #f9fafb;
+  padding: 2rem;
+  border-radius: 12px;
+  text-align: center;
+  grid-column: 1 / -1;
+}
+
 </style>

@@ -1,7 +1,8 @@
 <template>
   <div class="dashboard-overview">
     <header class="header">
-      <h1>Welcome back, {{ userName }}</h1>
+      <h1>Welcome, {{ userName }}</h1>
+      <br>
       <p>Here is your activity snapshot for today.</p>
     </header>
 
@@ -9,11 +10,11 @@
       <div class="card">
         <div class="card">
           <h3>Projects in progress</h3>
-          <p class="number">8</p>
+          <p class="number"> {{ projectsCount }}</p>
         </div>
         <div class="card">
           <h3>Tasks in progess</h3>
-          <p class="number">23</p>
+          <p class="number">{{tasksCount}}</p>
         </div>
       </div>
 
@@ -47,6 +48,8 @@ export default {
     return {
       userName: '',
       teamCount: 0,
+      projectsCount: 0,
+      tasksCount: 0,
       userId: null,
       assignedTasks: []
     };
@@ -62,6 +65,8 @@ export default {
     }
 
     this.fetchTeamCount();
+    this.fetchProjectsCount();
+    this.fetchTasksCount();
   },
 
   methods: {
@@ -76,6 +81,34 @@ export default {
         this.teamCount = data;
       } catch (error) {
         console.error('Error fetching team count:', error);
+      }
+    },
+
+    async fetchProjectsCount() {
+      try {
+        const response = await fetch(`${API_BASE_URL}/projects/count`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+          }
+        });
+        const data = await response.json();
+        this.projectsCount = data.count;
+      } catch (error) {
+        console.error('Error fetching projects count:', error);
+      }
+    },
+
+    async fetchTasksCount() {
+      try {
+        const response = await fetch(`${API_BASE_URL}/tasks/count`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+          }
+        });
+        const data = await response.json();
+        this.tasksCount = data.count;
+      } catch (error) {
+        console.error('Error fetching tasks count:', error);
       }
     },
 

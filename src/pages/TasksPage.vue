@@ -2,42 +2,82 @@
   <div class="tasks-page">
     <div class="header">
       <h1>Tasks</h1>
-      <router-link to="/tasks/create" class="create-btn">+ Create Task</router-link>
+      <div v-if="canCreateTask">
+        <router-link to="/tasks/create" class="create-btn">Create Task</router-link>
+      </div>
     </div>
 
-    <section class="task-list">
-      <router-link
-        v-for="task in tasks"
-        :key="task.id"
-        :to="`/tasks/${task.id}`"
-        class="task-card-wrapper"
-      >
-        <div class="task-card">
-          <h3>{{ task.title }}</h3>
-          <div class="description">
-            <p>{{ task.description.length > 100 ? task.description.substring(0, 100) + '...' : task.description }}</p>
-          </div>
-          <div class="task-details">
-          <div>
-            <p class="format-time"><small>Start: {{ formatDate(task.start_date) }} | <br> End: {{ formatDate(task.end_date) }}</small></p>
-            <span class="status" :class="task.status">{{ task.status }}</span>
-          </div>
-          <div class="actions">
-            <div class="icon-group">
-              <font-awesome-icon icon="edit" class="icon edit" @click.stop.prevent="editTask(task)" />
-              <font-awesome-icon icon="trash" class="icon delete" @click.stop.prevent="deleteTask(task.id)" />
-            </div>
-            <button class="assign-btn" @click.stop.prevent="goToAssignUsers(task.id)">Assign</button>
-          </div>
-          </div>
+<section class="task-list">
+  <!-- Loading State -->
+  <div v-if="isLoading" class="loading-message">
+    🔄 Loading assignments...
+  </div>
 
+  <!-- Empty State -->
+  <div v-else-if="tasks.length === 0" class="no-tasks">
+    🚫 No available assignments.
+  </div>
+
+  <!-- Task Cards -->
+  <router-link
+    v-else
+    v-for="task in tasks"
+    :key="task.id"
+    :to="`/tasks/${task.id}`"
+    class="task-card-wrapper"
+  >
+    <div class="task-card">
+      <h3>{{ task.title }}</h3>
+
+      <div class="description">
+        <p>
+          {{ task.description.length > 100
+            ? task.description.substring(0, 100) + '...'
+            : task.description }}
+        </p>
+      </div>
+
+      <div class="task-details">
+        <div>
+          <p class="format-time">
+            <small>
+              Start: {{ formatDate(task.start_date) }} <br />
+              End: {{ formatDate(task.end_date) }}
+            </small>
+          </p>
+          <span class="status" :class="task.status">{{ task.status }}</span>
         </div>
-      </router-link>
-    </section>
+
+        <div class="actions">
+          <div class="icon-group">
+            <font-awesome-icon
+              icon="edit"
+              class="icon edit"
+              title="Edit Task"
+              @click.stop.prevent="editTask(task)"
+            />
+            <font-awesome-icon
+              icon="trash"
+              class="icon delete"
+              title="Delete Task"
+              @click.stop.prevent="deleteTask(task.id)"
+            />
+          </div>
+          <button class="assign-btn" @click.stop.prevent="goToAssignUsers(task.id)">
+            Assign
+          </button>
+        </div>
+      </div>
+    </div>
+  </router-link>
+</section>
+
   </div>
 </template>
 
 <script>
+import { hasPermission } from '@/utils/permissions';
+
 const API_BASE_URL = process.env.VUE_APP_BASE_URL || 'http://localhost:8080';
 
 export default {
@@ -46,6 +86,7 @@ export default {
       tasks: [],
       userId: null,
       role: '',
+      isLoading: true,
     };
   },
 mounted() {
@@ -66,48 +107,74 @@ mounted() {
       this.fetchAssignedTasks();
     }
   }
-}
+},
+computed: {
+    canCreateTask() {
+      return hasPermission('Create Task');
+    }
+  }
 ,
   methods: {
     
-    async fetchTasks() {
-      const res = await fetch(`${API_BASE_URL}/tasks`);
-      const data = await res.json();
-      this.tasks = data;
-    },
+async fetchTasks() {
+  this.isLoading = true;
 
-async fetchAssignedTasks() {
-  if (!this.userId) return;
+  const startTime = Date.now();
 
   try {
-    const response = await fetch(`API_BASE_URL/user-tasks/${this.userId}`, {
+    const res = await fetch(`${API_BASE_URL}/tasks`);
+    const data = await res.json();
+    this.tasks = Array.isArray(data) ? data : [];
+  } catch (err) {
+    console.error('Error fetching tasks:', err);
+    this.tasks = [];
+  } finally {
+    // Ensure at least 500ms loading time
+    const elapsed = Date.now() - startTime;
+    const delay = Math.max(0, 500 - elapsed);
+    setTimeout(() => {
+      this.isLoading = false;
+    }, delay);
+  }
+},
+
+async fetchAssignedTasks() {
+  this.isLoading = true;
+
+  const startTime = Date.now();
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/user-tasks/${this.userId}`, {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('access_token')}`
       }
     });
 
     const data = await response.json();
-    console.log("Fetched assigned tasks:", data);
-
-    // Normalize task_id to id
     this.tasks = Array.isArray(data)
       ? data.map(task => ({
           ...task,
-          id: task.task_id // unify field
+          id: task.task_id
         }))
       : [];
   } catch (error) {
     console.error('Error fetching assigned tasks:', error);
+    this.tasks = [];
+  } finally {
+    const elapsed = Date.now() - startTime;
+    const delay = Math.max(0, 500 - elapsed);
+    setTimeout(() => {
+      this.isLoading = false;
+    }, delay);
   }
 }
-
 ,
     
     async deleteTask(taskId) {
       const confirmed = confirm('Are you sure you want to delete this task?');
       if (!confirmed) return;
 
-      const res = await fetch(`http://API_BASE_URL/tasks/${taskId}`, {
+      const res = await fetch(`${API_BASE_URL}/tasks/${taskId}`, {
         method: 'DELETE'
       });
 
@@ -290,5 +357,15 @@ async fetchAssignedTasks() {
   padding-top: 1rem;
   font-size: small;
   color: #676767;
+}
+
+.no-tasks {
+  font-size: 1rem;
+  color: #6b7280;
+  background-color: #f9fafb;
+  padding: 2rem;
+  border-radius: 12px;
+  text-align: center;
+  grid-column: 1 / -1;
 }
 </style>

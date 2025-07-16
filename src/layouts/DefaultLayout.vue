@@ -19,8 +19,11 @@
   <nav class="nav-links">
     <router-link to="/dashboard">📉 Dashboard</router-link>
 
-    <details>
-      <summary>👷🏿 Resources</summary>
+    <details class="dropdown">
+      <summary class="summary-with-toggle-arrow">
+        👷🏿 Resources
+      </summary>
+      <hr>
       <div class="submenu">
         <router-link to="/team">👥 Team</router-link>
         <router-link to="/projects">🚧 Projects</router-link>
@@ -29,15 +32,23 @@
     </details>
 
     <details>
-      <summary>⚙️ Settings</summary>
+      <summary class="summary-with-toggle-arrow">⚙️ Settings</summary>
+      <hr>
       <div class="submenu">
         <router-link to="/settings">⚙️ General Settings</router-link>
-        <details>
+        <details v-if="getAllRoles">
           <summary>🔐 Access Control</summary>
+          <hr>
           <div class="submenu">
+            <div v-if="getAllRoles">
             <router-link to="/roles">Roles</router-link>
+            </div>
+            <div v-if="canAccessPermissions">
             <router-link to="/assign">Permissions</router-link>
-            <router-link to="/role-permissions">Role Permissions</router-link>
+            </div>
+            <div v-if="canAccessPermissions">
+              <router-link to="/role-permissions">Role Permissions</router-link>
+            </div>
           </div>
         </details>
       </div>
@@ -69,8 +80,9 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import {logout} from '../utils/logout.js'
+import { hasPermission } from '@/utils/permissions';
 
 const isSidebarOpen = ref(true)
 const userName = ref('User')
@@ -82,6 +94,14 @@ function toggleSidebar() {
 function handleLogout() {
   logout()
 }
+
+const canAccessPermissions = computed(() => {
+  return hasPermission('Get All Permissions');
+});
+
+const getAllRoles = computed(() => {
+  return hasPermission('Get All Roles');
+});
 
 onMounted(() => {
   const storedName = localStorage.getItem('user')
@@ -127,6 +147,7 @@ onMounted(() => {
   transition: transform 0.3s ease;
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
 }
 
 .sidebar.collapsed {
@@ -304,5 +325,27 @@ details[open] summary {
   margin-top: auto;
   padding-top: 1rem
 }
+
+/* Default arrow hidden */
+.summary-with-toggle-arrow::after {
+  content: '';
+  opacity: 0;
+  margin-left: 6px;
+  transition: opacity 0.2s, content 0.2s;
+}
+
+/* Show ▾ on hover (not open) */
+.dropdown:not([open]) .summary-with-toggle-arrow:hover::after {
+  content: '▾';
+  opacity: 1;
+}
+
+/* Show ▴ when open */
+.dropdown[open] .summary-with-toggle-arrow::after {
+  content: '▴';
+  opacity: 1;
+}
+
+
 
 </style>

@@ -25,6 +25,12 @@ import AssignUsersToProject from '@/pages/AssignUsersToProject.vue';
 const routes = [
   {
     path: '/',
+    redirect: () => {
+      return localStorage.getItem('access_token') ? '/dashboard' : '/login';
+    }
+  },
+  {
+    path: '/',
     component: DefaultLayout,
     meta: { requiresAuth: true  },
     children: [

@@ -5,7 +5,7 @@
         <h1>👥 Team</h1>
         <p>Manage your team members</p>
       </div>
-      <div>
+      <div v-if="canCreateUser">
         <router-link to="/add-user" class="add-btn">
           Add New User
         </router-link>
@@ -13,13 +13,13 @@
     </header>
 
     <!-- Tabs -->
-    <div class="tabs">
+    <!-- <div class="tabs">
       <button :class="{ active: activeTab === 'assigned' }" @click="activeTab = 'assigned'">Assigned to Projects</button>
       <button :class="{ active: activeTab === 'all' }" @click="activeTab = 'all'">All Team Members</button>
-    </div>
+    </div> -->
 
     <!-- Assigned View (Unchanged) -->
-    <section v-if="activeTab == 'assigned'" class="team-list">
+    <!-- <section v-if="activeTab == 'assigned'" class="team-list">
       <div v-for="(member, index) in teamProjects" :key="index" class="team-card" @click="openEditModal(member)">
         <h3>{{ member.name }}</h3>
         <p>{{ member.email }}</p>
@@ -31,43 +31,45 @@
           </div>
         </div>
       </div>
-    </section>
+    </section> -->
 
     <!-- All Users Table -->
-    <section v-if="activeTab === 'all'">
+    <section>
       <table class="team-table">
         <thead>
           <tr>
             <th>Name</th>
             <th>Email</th>
             <th>Role</th>
-            <th>Actions</th>
+            <th v-if="canCreateUser">Actions</th>
           </tr>
         </thead>
-        <tbody>
-          <template v-for="(member, index) in team" :key="index">
-            <tr @click="toggleUserProjects(member.id)" style="cursor: pointer;">
-              <td>{{ member.name }}</td>
-              <td>{{ member.email }}</td>
-              <td>{{ member.role }}</td>
-              <td>
-                <font-awesome-icon icon="edit" class="icon edit" @click.stop="openEditModal(member)" />
-                <font-awesome-icon icon="trash" class="icon delete" @click.stop="deleteMember(member.id)" />
-              </td>
-            </tr>
+          <tbody>
+            <template v-for="(member) in team" :key="member.id">
+              <tr @click="toggleUserProjects(member.id)" style="cursor: pointer;">
+                <td>{{ member.name }}</td>
+                <td>{{ member.email }}</td>
+                <td>{{ member.role }}</td>
+                <td v-if="canEditUser">
+                  <div>
+                    <font-awesome-icon icon="edit" class="icon edit" @click.stop="openEditModal(member)" />
+                    <font-awesome-icon icon="trash" class="icon delete" @click.stop="deleteMember(member.id)" />
+                  </div>
+                </td>
+              </tr>
 
-            <!-- Expanded Row -->
-            <tr v-if="expandedUserId === member.id">
-              <td colspan="4" class="expanded-row">
-                <div v-if="loadingUserId === member.id">🔄 Loading projects...</div>
-                <ul v-else-if="userProjectMap[member.id]?.length">
-                  <li v-for="(proj, i) in userProjectMap[member.id]" :key="i">📁 {{ proj.name }}</li>
-                </ul>
-                <p v-else>No Projects Assigned.</p>
-              </td>
-            </tr>
-          </template>
-        </tbody>
+              <!-- Expanded Row -->
+              <tr v-if="expandedUserId === member.id">
+                <td :colspan="canEditUser ? 4 : 3" class="expanded-row">
+                  <div v-if="loadingUserId === member.id">🔄 Loading projects...</div>
+                  <ul v-else-if="userProjectMap[member.id]?.length">
+                    <li v-for="(proj, i) in userProjectMap[member.id]" :key="i">📁 {{ proj.name }}</li>
+                  </ul>
+                  <p v-else>No Projects Assigned.</p>
+                </td>
+              </tr>
+            </template>
+          </tbody>
       </table>
     </section>
 
@@ -91,6 +93,7 @@
 </template>
 
 <script>
+import { hasPermission } from '@/utils/permissions';
 const API_BASE_URL = process.env.VUE_APP_BASE_URL || 'http://localhost:8080';
 
 export default {
@@ -106,6 +109,15 @@ export default {
       loadingUserId: null,
     };
   },
+  computed: {
+    canCreateUser() {
+      return hasPermission('Create User');
+    },
+
+    canEditUser() {
+      return hasPermission('Update User');
+    },
+},
   methods: {
     async fetchRoles() {
       try {
@@ -243,6 +255,7 @@ async toggleUserProjects(userId) {
 .team-page {
   padding: 2rem;
   font-family: 'Segoe UI', sans-serif;
+  overflow-x: auto;
 }
 .page-header {
   display: flex;
@@ -501,6 +514,7 @@ select:focus {
 }
 
 .team-table {
+  table-layout: fixed;
   width: 100%;
   border-collapse: separate;
   border-spacing: 0 0.5rem;
