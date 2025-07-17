@@ -104,7 +104,7 @@ const routes = [
         name: 'TaskDetail',
         component: TaskDetail,
         props: true,
-        meta: { requiredPermission: 'Get My Task By ID' }
+        // meta: { requiredPermission: 'Get My Task By ID' }
       },
       {
         path: 'tasks/create',
@@ -116,7 +116,7 @@ const routes = [
         path: '/tasks/:id/edit',
         name: 'TaskEdit',
         component: TaskEdit,
-        meta: { requiredPermission: 'Edit Task' }
+        // meta: { requiredPermission: 'Update Task' }
       },
       {
         path: '/add-user',

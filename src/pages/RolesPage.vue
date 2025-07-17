@@ -2,14 +2,14 @@
   <div class="roles-page">
     <header class="page-header">
       <h1>🛡️ Roles</h1>
-      <p>Define and manage user roles and their permissions.</p>
+      <p>User roles and their permissions.</p>
     </header>
 
     <section class="role-list">
       <div class="role-card" v-for="role in roles" :key="role.id">
         <h3>{{ role.name }}</h3>
-        <ul class="permissions">
-          <li v-for="perm in role.permissions" :key="perm">{{ perm }}</li>
+        <ul class="description">
+          <li>{{ role.description }}</li>
         </ul>
       </div>
     </section>
@@ -17,29 +17,36 @@
 </template>
 
 <script>
+const API_BASE_URL = process.env.VUE_APP_BASE_URL || 'http://localhost:8080';
+
 export default {
   name: 'RolesPage',
   data() {
     return {
-      roles: [
-        {
-          id: 1,
-          name: 'Admin',
-          permissions: ['create-user', 'delete-user', 'edit-project', 'view-reports']
-        },
-        {
-          id: 2,
-          name: 'Project Manager',
-          permissions: ['edit-project', 'assign-tasks', 'view-reports']
-        },
-        {
-          id: 3,
-          name: 'Viewer',
-          permissions: ['view-projects']
-        }
-      ]
+      roles: []
     };
+  },
+
+mounted() {
+  this.fetchRoles();
+},
+methods: {
+  async fetchRoles() {
+    try {
+      const token = localStorage.getItem('access_token');
+      const response = await fetch(`${API_BASE_URL}/roles`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+      if (!response.ok) {
+        throw new Error('Failed to fetch roles');
+      }
+      this.roles = await response.json();
+    } catch (error) {
+      console.error('Error fetching roles:', error);
+    }
   }
+}
+
 };
 </script>
 
@@ -78,13 +85,13 @@ export default {
   color: #1f2937;
 }
 
-.permissions {
+.description {
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
-.permissions li {
+.description li {
   background-color: #f3f4f6;
   color: #374151;
   margin-bottom: 0.5rem;

@@ -63,7 +63,7 @@
               @click.stop.prevent="deleteTask(task.id)"
             />
           </div>
-          <button class="assign-btn" @click.stop.prevent="goToAssignUsers(task.id)">
+          <button v-if="assignTask" class="assign-btn" @click.stop.prevent="goToAssignUsers(task.id)">
             Assign
           </button>
         </div>
@@ -91,26 +91,43 @@ export default {
   },
 mounted() {
   const storedUser = localStorage.getItem('user');
-  if (storedUser) {
+
+  if (!storedUser) {
+    console.warn('No user in localStorage');
+    this.isLoading = false;
+    return;
+  }
+
+  try {
     const userObj = JSON.parse(storedUser);
     this.userName = userObj.name || '';
     this.userId = userObj.id;
 
-    // FIX: Use role.name instead of role_id
-    this.role = userObj.role?.name?.toLowerCase() || '';
+    // Handle both role.name and role as plain string
+    this.role = (userObj.role?.name || userObj.role || '').toLowerCase();
 
-    console.log('User Role:', this.role);
+    console.log('User:', this.userName, '| Role:', this.role);
 
-    if (this.userName === 'admin') {
+    if (this.userName.toLowerCase() === 'admin' || this.role === 'admin') {
+      console.log('Fetching all tasks...');
       this.fetchTasks();
     } else {
+      console.log('Fetching assigned tasks for user ID:', this.userId);
       this.fetchAssignedTasks();
     }
+  } catch (err) {
+    console.error('Error parsing user from localStorage:', err);
+    this.isLoading = false;
   }
-},
+}
+,
 computed: {
     canCreateTask() {
       return hasPermission('Create Task');
+    },
+
+    assignTask() {
+      return hasPermission('Assign Users to Task');
     }
   }
 ,
@@ -166,6 +183,33 @@ async fetchAssignedTasks() {
     setTimeout(() => {
       this.isLoading = false;
     }, delay);
+  }
+}
+,
+
+async getTask(taskId) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/tasks/${taskId}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(`Failed to fetch task: ${errorData.message || res.statusText}`);
+    }
+
+    const task = await res.json();
+    console.log('Fetched task:', task);
+    return task;
+
+  } catch (error) {
+    console.error('Error getting task:', error.message);
+    // Optionally show an error message to the user
+    return null;
   }
 }
 ,

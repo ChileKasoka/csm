@@ -71,7 +71,7 @@
           ☰
         </button>
         <div class="navbar-right">
-          <span class="user-info">Hi, {{ userName.name }}</span>
+          <span class="user-info">{{ userName.name }}</span>
         </div>
       </header>
       <router-view />
@@ -122,7 +122,7 @@ onMounted(() => {
 
 /* Toggle Button */
 .toggle-btn {
-  color: #fff;
+  color: #000000;
   top: 0.5rem;
   left: 0.5rem;
   background: #ffff1a;
