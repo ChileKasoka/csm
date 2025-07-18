@@ -49,7 +49,7 @@ const routes = [
         path: 'tasks', 
         name: 'tasks', 
         component: TasksPage ,
-        meta: { requiredPermission: 'Get All Tasks' }
+        // meta: { requiredPermission: 'Get All Tasks' }
       },
       {
         path: '/roles',
