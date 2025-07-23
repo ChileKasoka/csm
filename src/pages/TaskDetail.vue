@@ -1,21 +1,37 @@
 <template>
-  <div class="task-detail">
-    <!-- <div class="card"> -->
-      <h1>{{ task.title }}</h1>
-      <div class="meta">
-        <br>
-        <p class="description">{{ task.description }}</p>
-        <br>
-        <p><strong>Start Date:</strong> {{ formatDate(task.start_date) }}</p>
-        <p><strong>End Date:</strong> {{ formatDate(task.end_date) }}</p>
-        <br>
-        <p><strong>Status:</strong> <span :class="['badge', task.status]">{{ task.status }}</span></p>
+  <div class="task-detail-page">
+    <div class="task-card">
+      <h1 class="task-title">{{ task.title }}</h1>
+
+      <div class="task-meta">
+        <div class="meta-section">
+          <label><i class="fas fa-align-left"></i> Description</label>
+          <p class="meta-content">{{ task.description }}</p>
+        </div>
+
+        <div class="meta-grid">
+          <div class="meta-section">
+            <label><i class="fas fa-calendar-alt"></i> Start Date</label>
+            <p class="meta-content">{{ formatDate(task.start_date) }}</p>
+          </div>
+          <div class="meta-section">
+            <label><i class="fas fa-calendar-check"></i> End Date</label>
+            <p class="meta-content">{{ formatDate(task.end_date) }}</p>
+          </div>
+        </div>
+
+        <div class="meta-section">
+          <label><i class="fas fa-flag"></i> Status</label>
+          <p class="meta-content">
+            <span :class="['badge', task.status?.toLowerCase().replace(' ', '-') || '']">
+              {{ task.status }}
+            </span>
+          </p>
+        </div>
       </div>
 
-
-
       <router-link to="/tasks" class="back-button">← Back to Tasks</router-link>
-    <!-- </div> -->
+    </div>
   </div>
 </template>
 
@@ -58,63 +74,94 @@ export default {
 </script>
 
 <style scoped>
-.task-detail {
-  padding: 2rem;
-  font-family: 'Segoe UI', sans-serif;
-  background-color: #f9fafb;
+.task-detail-page {
+  background: #f1f5f9;
   min-height: 100vh;
+  padding: 3rem 1.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: start;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.task-card {
+  background: #ffffff;
+  border-radius: 1rem;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+  padding: 2.5rem;
+  max-width: 800px;
   width: 100%;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease-in-out;
 }
 
-.task-detail h1 {
-  font-size: 2rem;
-  margin-bottom: 0.5rem;
+.task-title {
+  font-size: 2.2rem;
   color: #111827;
+  margin-bottom: 2rem;
+  border-bottom: 2px solid #e5e7eb;
+  padding-bottom: 1rem;
 }
 
-.description {
+.task-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.meta-grid {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.meta-section label {
+  font-weight: 600;
+  color: #6b7280;
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.meta-section i {
+  margin-right: 0.5rem;
+  color: #9ca3af;
+}
+
+.meta-content {
   font-size: 1.1rem;
   color: #374151;
-  margin-bottom: 1.5rem;
-}
-
-.meta p {
-  margin: 0.5rem 0;
-  font-size: 0.95rem;
-  color: #4b5563;
 }
 
 .badge {
-  padding: 0.2rem 0.6rem;
+  display: inline-block;
+  padding: 0.4rem 1rem;
   border-radius: 999px;
   font-weight: 600;
+  font-size: 0.9rem;
   text-transform: capitalize;
-  font-size: 0.85rem;
 }
 
 .badge.pending {
-  background-color: #fef3c7;
-  color: #b45309;
+  background-color: #fff3cd;
+  color: #856404;
 }
-
 .badge.in-progress {
-  background-color: #dbeafe;
-  color: #1d4ed8;
+  background-color: #bee3f8;
+  color: #2b6cb0;
 }
-
 .badge.completed {
-  background-color: #d1fae5;
-  color: #047857;
+  background-color: #c6f6d5;
+  color: #2f855a;
 }
 
 .back-button {
   display: inline-block;
-  margin-top: 2rem;
+  margin-top: 2.5rem;
   color: #2563eb;
   text-decoration: none;
   font-weight: 500;
   transition: color 0.2s ease;
+  font-size: 1rem;
 }
 
 .back-button:hover {

@@ -7,18 +7,63 @@
       </div>
     </div>
 
-<section class="task-list">
-  <!-- Loading State -->
+    <div class="tabs">
+      <button :class="{ active: activeTab === 'assigned' }" @click="activeTab = 'assigned'">Assignments in Progress</button>
+      <button :class="{ active: activeTab === 'all' }" @click="activeTab = 'all'">All</button>
+    </div>
+
+<!-- All Assignments (admin) -->
+<section v-if="activeTab === 'all'" class="task-table-section">
   <div v-if="isLoading" class="loading-message">
     🔄 Loading assignments...
   </div>
 
-  <!-- Empty State -->
   <div v-else-if="tasks.length === 0" class="no-tasks">
     🚫 No available assignments.
   </div>
 
-  <!-- Task Cards -->
+  <table v-else class="task-table">
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Assigned To</th>
+        <th>Status</th>
+        <th>Start Date</th>
+        <th>End Date</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr v-for="task in tasks" :key="task.id">
+        <td>{{ task.title }}</td>
+        <td>{{ task.assigned_to || '—' }}</td>
+        <td>
+          <span class="status" :class="task.status">{{ task.status }}</span>
+        </td>
+        <td>{{ formatDate(task.start_date) }}</td>
+        <td>{{ formatDate(task.end_date) }}</td>
+        <td class="table-actions">
+          <font-awesome-icon icon="edit" class="icon edit" @click.stop.prevent="editTask(task)" />
+          <font-awesome-icon icon="trash" class="icon delete" @click.stop.prevent="deleteTask(task.id)" />
+          <button v-if="assignTask" class="assign-btn" @click.stop.prevent="goToAssignUsers(task.id)">
+            Assign
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- Assigned to current user -->
+<section v-else-if="activeTab === 'assigned'" class="task-list">
+  <div v-if="isLoading" class="loading-message">
+    🔄 Loading assignments...
+  </div>
+
+  <div v-else-if="tasks.length === 0" class="no-tasks">
+    🚫 No available assignments.
+  </div>
+
   <router-link
     v-else
     v-for="task in tasks"
@@ -72,6 +117,7 @@
   </router-link>
 </section>
 
+
   </div>
 </template>
 
@@ -87,6 +133,7 @@ export default {
       userId: null,
       role: '',
       isLoading: true,
+      activeTab: 'assigned'
     };
   },
 mounted() {
@@ -412,4 +459,67 @@ async getTask(taskId) {
   text-align: center;
   grid-column: 1 / -1;
 }
+
+.task-table-section {
+  margin-top: 1rem;
+  overflow-x: auto;
+}
+
+.task-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.task-table th,
+.task-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #e5e7eb;
+  text-align: left;
+}
+
+.task-table th {
+  background-color: #f3f4f6;
+  font-weight: 600;
+  color: #374151;
+}
+
+.task-table td {
+  color: #4b5563;
+}
+
+.table-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.tabs {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.tabs button {
+  padding: 0.5rem 1rem;
+  border: none;
+  background-color: #f0f0f0;
+  color: #333;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.tabs button:hover {
+  background-color: #e0e0e0;
+}
+
+.tabs button.active {
+  background-color: #c5d209;
+  color: white;
+}
+
 </style>

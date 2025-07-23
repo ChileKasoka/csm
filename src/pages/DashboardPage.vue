@@ -9,7 +9,7 @@
     <section class="cards">
       <div class="card">
         <router-link :to="'/projects'" class="card-link">
-          <div class="card">
+          <div class="card-i">
             <h3>Projects in progress</h3>
             <p class="number"> {{ projectsCount }}</p>
           </div>
@@ -169,6 +169,16 @@ async fetchAssignedTasks() {
 
 .card {
   background: #ffffff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
+  transition: transform 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.card-i {
+  background: #edff9c;
   border-radius: 12px;
   padding: 1.5rem;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
