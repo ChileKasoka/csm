@@ -1,9 +1,9 @@
 <template>
   <div class="tasks-page">
     <div class="header">
-      <h1>Tasks</h1>
+      <h1>Assignments</h1>
       <div v-if="canCreateTask">
-        <router-link to="/tasks/create" class="create-btn">Create Task</router-link>
+        <router-link to="/tasks/create" class="create-btn">Create Assignment</router-link>
       </div>
     </div>
 

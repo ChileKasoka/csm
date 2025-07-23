@@ -8,20 +8,26 @@
 
     <section class="cards">
       <div class="card">
-        <div class="card">
-          <h3>Projects in progress</h3>
-          <p class="number"> {{ projectsCount }}</p>
-        </div>
-        <div class="card">
-          <h3>Tasks in progess</h3>
-          <p class="number">{{tasksCount}}</p>
-        </div>
+        <router-link :to="'/projects'" class="card-link">
+          <div class="card">
+            <h3>Projects in progress</h3>
+            <p class="number"> {{ projectsCount }}</p>
+          </div>
+        </router-link>
+        <router-link :to="'/tasks'" class="card-link">
+          <div class="card">
+            <h3>Tasks in progess</h3>
+            <p class="number">{{tasksCount}}</p>
+          </div>
+        </router-link>
       </div>
 
-      <div class="card">
-        <h3>Team Members</h3>
-        <p class="number"> {{ teamCount }} </p>
-      </div>
+      <router-link :to="'/team'" class="card-link">
+        <div class="card">
+          <h3>Team Members</h3>
+          <p class="number"> {{ teamCount }} </p>
+        </div>
+      </router-link>
       <div class="card task-list-card">
         <h3>My Assigned Tasks</h3>
         <ul>
@@ -167,6 +173,8 @@ async fetchAssignedTasks() {
   padding: 1.5rem;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
   transition: transform 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+  text-decoration: none;
 }
 
 .card:hover {
@@ -235,4 +243,10 @@ async fetchAssignedTasks() {
   color: #6b7280;
   font-size: 0.9rem;
 }
+
+.card-link {
+  text-decoration: none;
+  color: inherit;
+}
+
 </style>
