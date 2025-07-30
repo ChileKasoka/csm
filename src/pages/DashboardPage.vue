@@ -16,11 +16,18 @@
         </router-link>
         <router-link :to="'/tasks'" class="card-link">
           <div class="card">
-            <h3>Tasks in progess</h3>
+            <h3>Assignments in progess</h3>
             <p class="number">{{tasksCount}}</p>
           </div>
         </router-link>
       </div>
+
+      <!-- <router-link :to="'/alerts'" class="card-link"> -->
+        <div class="card">
+          <h3>Alerts</h3>
+          <p>Nil Notifications</p>
+        </div>
+      <!-- </router-link> -->
 
       <router-link :to="'/team'" class="card-link">
         <div class="card">
@@ -29,7 +36,7 @@
         </div>
       </router-link>
       <div class="card task-list-card">
-        <h3>My Assigned Tasks</h3>
+        <h3>Assignments</h3>
         <ul>
           <li v-for="task in assignedTasks" :key="task.task_id">
             <router-link :to="`/tasks/${task.task_id}`" class="task-link">
@@ -37,7 +44,7 @@
               <span class="description">{{ truncate(task.description) }}</span>
             </router-link>
           </li>
-          <li v-if="assignedTasks.length === 0">No tasks assigned</li>
+          <li v-if="assignedTasks.length === 0">No assignments yet</li>
         </ul>
       </div>
     </section>

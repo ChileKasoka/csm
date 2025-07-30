@@ -18,7 +18,8 @@
 
   <nav class="nav-links">
     <router-link to="/dashboard">📉 Dashboard</router-link>
-
+    <!-- <br>
+    <router-link to="/alerts">🔔 Alerts</router-link> -->
     <details class="dropdown">
       <summary class="summary-with-toggle-arrow">
         👷🏿 Resources
