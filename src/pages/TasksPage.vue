@@ -313,13 +313,13 @@ async getTask(taskId) {
 }
 
 .create-btn {
-  background-color: #676767;
-  color: #ffffff;
-  border: none;
+  background-color: inherit;
+  color: #000000;
+  border: solid 1px #252a30;
   padding: 0.6rem 1.2rem;
-  border-radius: 20px;
+  border-radius: 5px;
   cursor: pointer;
-  font-weight: bold;
+  /* font-weight: lighter; */
   margin-bottom: 1rem;
   text-decoration: none;
 }
@@ -427,15 +427,14 @@ async getTask(taskId) {
 }
 
 .assign-btn {
-  margin-top: 2rem;
-  background-color: #676767;
-  color: #ffffff;
-  border: none;
+  background-color: inherit;
+  color: #000000;
+  border: solid 1px #252a30;
   padding: 0.6rem 1.2rem;
-  border-radius: 20px;
+  border-radius: 5px;
   cursor: pointer;
-  font-weight: bold;
-  margin-bottom: 1rem;
+  /* font-weight: lighter; */
+  margin: 1rem;
   text-decoration: none;
 }
 

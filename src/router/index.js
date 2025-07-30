@@ -97,7 +97,7 @@ const routes = [
         path: 'projects/:id/edit',
         name: 'EditProject',
         component: EditProject,
-        meta: { requiredPermission: 'Edit Project' }
+        meta: { requiredPermission: 'Update Project' }
       },
       {
         path: 'tasks/:id',
