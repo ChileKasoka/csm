@@ -4,65 +4,84 @@
     <h2 class="project-name">{{ project.name }}</h2>
     <p class="project-description">{{ project.description }}</p>
 
-    <!-- Details Grid -->
-    <div class="project-grid">
-      <!-- Dynamic Fields -->
-      <div class="detail-card">
-        <h4>Project Name</h4>
-        <p>{{ project.name }}</p>
+    <!-- Tab Navigation -->
+    <div class="tab-nav">
+      <button :class="{ active: currentTab === 'details' }" @click="currentTab = 'details'">Details</button>
+      <button :class="{ active: currentTab === 'users' }" @click="currentTab = 'users'">Assigned Users</button>
+    </div>
+
+    <!-- Details Tab -->
+    <div v-if="currentTab === 'details'">
+      <!-- Details Grid -->
+      <div class="project-grid">
+        <div class="detail-card">
+          <h4>Project Name</h4>
+          <p>{{ project.name }}</p>
+        </div>
+
+        <div class="detail-card description-card">
+          <h4>Description</h4>
+          <p>{{ project.description }}</p>
+        </div>
+
+        <div class="detail-card">
+          <h4>Status</h4>
+          <span :class="statusClass">{{ project.status }}</span>
+        </div>
+
+        <div class="detail-card">
+          <h4>Client</h4>
+          <p>ZamBuild Ltd.</p>
+        </div>
+
+        <div class="detail-card">
+          <h4>Location</h4>
+          <p>Lusaka, Zambia</p>
+        </div>
+
+        <div class="detail-card">
+          <h4>Project Manager</h4>
+          <p>Eng. John Mwale</p>
+        </div>
+
+        <div class="detail-card">
+          <h4>Contractor</h4>
+          <p>Elite Constructions</p>
+        </div>
+
+        <div class="detail-card">
+          <h4>Start Date</h4>
+          <p>{{ project.start_date }}</p>
+        </div>
+
+        <div class="detail-card">
+          <h4>End Date</h4>
+          <p>{{ project.end_date }}</p>
+        </div>
+
+        <div class="detail-card">
+          <h4>Budget</h4>
+          <p>N/A</p>
+        </div>
       </div>
 
-      <div class="detail-card description-card">
-        <h4>Description</h4>
-        <p>{{ project.description }}</p>
-      </div>
-
-      <div class="detail-card">
-        <h4>Status</h4>
-        <span :class="statusClass">{{ project.status }}</span>
-      </div>
-
-      <!-- Static Fields (to be made dynamic later) -->
-      <div class="detail-card">
-        <h4>Client</h4>
-        <p>ZamBuild Ltd.</p>
-      </div>
-
-      <div class="detail-card">
-        <h4>Location</h4>
-        <p>Lusaka, Zambia</p>
-      </div>
-
-      <div class="detail-card">
-        <h4>Project Manager</h4>
-        <p>Eng. John Mwale</p>
-      </div>
-
-      <div class="detail-card">
-        <h4>Contractor</h4>
-        <p>Elite Constructions</p>
-      </div>
-
-      <div class="detail-card">
-        <h4>Start Date</h4>
-        <p>{{ project.start_date }}</p>
-      </div>
-
-      <div class="detail-card">
-        <h4>End Date</h4>
-        <p>{{project.end_date}}</p>
-      </div>
-
-      <div class="detail-card">
-        <h4>Budget</h4>
-        <p>N/A</p>
+      <!-- Actions -->
+      <div class="actions">
+        <router-link to="/projects" class="back-button">← Back to Projects</router-link>
+        <button class="assign-btn" @click="goToAssignUsers(project.id)">Assign Users</button>
       </div>
     </div>
 
-    <!-- Actions -->
-    <div class="actions">
-      <router-link to="/projects" class="back-button">← Back to Projects</router-link>
-      <button class="assign-btn" @click="goToAssignUsers(project.id)">Assign Users</button>
+    <!-- Assigned Users Tab -->
+    <div v-if="currentTab === 'users'" class="assigned-users-tab">
+      <div v-if="loadingUsers">Loading users...</div>
+      <div v-else-if="assignedUsers.length === 0">No users assigned to this project.</div>
+      <ul v-else class="assigned-users-list">
+        <li v-for="user in assignedUsers" :key="user.user_id">
+          <strong>{{ user.user_name }}</strong> — {{ user.user_email }}
+          <span v-if="user.role_name"> ({{ user.role_name }})</span>
+        </li>
+      </ul>
     </div>
   </div>
 </template>
@@ -75,7 +94,10 @@ export default {
   props: ['id'],
   data() {
     return {
-      project: null
+      project: null,
+      currentTab: 'details',
+      assignedUsers: [],
+      loadingUsers: false
     };
   },
   computed: {
@@ -92,9 +114,29 @@ export default {
       }
     }
   },
+  watch: {
+    currentTab(newTab) {
+      if (newTab === 'users' && this.assignedUsers.length === 0) {
+        this.fetchAssignedUsers();
+      }
+    }
+  },
   methods: {
     goToAssignUsers(projectId) {
       this.$router.push(`/user-project/${projectId}/assign-users`);
+    },
+    async fetchAssignedUsers() {
+      this.loadingUsers = true;
+      try {
+        const res = await fetch(`${API_BASE_URL}/user-projects/project/${this.id}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        this.assignedUsers = await res.json();
+      } catch (err) {
+        console.error('Failed to fetch assigned users:', err);
+        this.assignedUsers = [];
+      } finally {
+        this.loadingUsers = false;
+      }
     }
   },
   async created() {
@@ -132,6 +174,28 @@ export default {
   font-size: 1.1rem;
   color: #4b5563;
   margin-bottom: 2rem;
+}
+
+.tab-nav {
+  display: flex;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.tab-nav button {
+  background: none;
+  border: none;
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  color: #4b5563;
+  border-bottom: 3px solid transparent;
+}
+
+.tab-nav button.active {
+  color: #111827;
+  border-color: #2563eb;
 }
 
 .project-grid {
@@ -233,5 +297,24 @@ export default {
 .assign-btn:hover {
   background-color: #eab308;
   color: #1e1e1e;
+}
+
+.assigned-users-tab {
+  margin-top: 2rem;
+}
+
+.assigned-users-list {
+  list-style: none;
+  padding-left: 0;
+}
+
+.assigned-users-list li {
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+  color: #1f2937;
 }
 </style>
