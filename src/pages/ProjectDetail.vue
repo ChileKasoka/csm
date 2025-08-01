@@ -12,60 +12,20 @@
 
     <!-- Details Tab -->
     <div v-if="currentTab === 'details'">
-      <!-- Details Grid -->
       <div class="project-grid">
-        <div class="detail-card">
-          <h4>Project Name</h4>
-          <p>{{ project.name }}</p>
-        </div>
-
-        <div class="detail-card description-card">
-          <h4>Description</h4>
-          <p>{{ project.description }}</p>
-        </div>
-
-        <div class="detail-card">
-          <h4>Status</h4>
-          <span :class="statusClass">{{ project.status }}</span>
-        </div>
-
-        <div class="detail-card">
-          <h4>Client</h4>
-          <p>ZamBuild Ltd.</p>
-        </div>
-
-        <div class="detail-card">
-          <h4>Location</h4>
-          <p>Lusaka, Zambia</p>
-        </div>
-
-        <div class="detail-card">
-          <h4>Project Manager</h4>
-          <p>Eng. John Mwale</p>
-        </div>
-
-        <div class="detail-card">
-          <h4>Contractor</h4>
-          <p>Elite Constructions</p>
-        </div>
-
-        <div class="detail-card">
-          <h4>Start Date</h4>
-          <p>{{ project.start_date }}</p>
-        </div>
-
-        <div class="detail-card">
-          <h4>End Date</h4>
-          <p>{{ project.end_date }}</p>
-        </div>
-
-        <div class="detail-card">
-          <h4>Budget</h4>
-          <p>N/A</p>
-        </div>
+        <!-- Reused detail cards -->
+        <div class="detail-card"><h4>Project Name</h4><p>{{ project.name }}</p></div>
+        <div class="detail-card description-card"><h4>Description</h4><p>{{ project.description }}</p></div>
+        <div class="detail-card"><h4>Status</h4><span :class="statusClass">{{ project.status }}</span></div>
+        <div class="detail-card"><h4>Client</h4><p>ZamBuild Ltd.</p></div>
+        <div class="detail-card"><h4>Location</h4><p>Lusaka, Zambia</p></div>
+        <div class="detail-card"><h4>Project Manager</h4><p>Eng. John Mwale</p></div>
+        <div class="detail-card"><h4>Contractor</h4><p>Elite Constructions</p></div>
+        <div class="detail-card"><h4>Start Date</h4><p>{{ project.start_date }}</p></div>
+        <div class="detail-card"><h4>End Date</h4><p>{{ project.end_date }}</p></div>
+        <div class="detail-card"><h4>Budget</h4><p>N/A</p></div>
       </div>
 
-      <!-- Actions -->
       <div class="actions">
         <router-link to="/projects" class="back-button">← Back to Projects</router-link>
         <button class="assign-btn" @click="goToAssignUsers(project.id)">Assign Users</button>
@@ -75,13 +35,15 @@
     <!-- Assigned Users Tab -->
     <div v-if="currentTab === 'users'" class="assigned-users-tab">
       <div v-if="loadingUsers">Loading users...</div>
-      <div v-else-if="assignedUsers.length === 0">No users assigned to this project.</div>
-      <ul v-else class="assigned-users-list">
-        <li v-for="user in assignedUsers" :key="user.user_id">
-          <strong>{{ user.user_name }}</strong> — {{ user.user_email }}
-          <span v-if="user.role_name"> ({{ user.role_name }})</span>
-        </li>
-      </ul>
+      <div v-else>
+        <div v-if="assignedUsers.length === 0">No users assigned to this project.</div>
+        <ul v-else class="assigned-users-list">
+          <li v-for="user in assignedUsers" :key="user.user_id">
+            <strong>{{ user.user_name }}</strong> — {{ user.user_email }}
+            <span v-if="user.role_name"> ({{ user.role_name }})</span>
+          </li>
+        </ul>
+      </div>
     </div>
   </div>
 </template>
@@ -97,26 +59,23 @@ export default {
       project: null,
       currentTab: 'details',
       assignedUsers: [],
-      loadingUsers: false
+      loadingUsers: false,
+      usersFetched: false
     };
   },
   computed: {
     statusClass() {
       switch ((this.project?.status || '').toLowerCase()) {
-        case 'completed':
-          return 'status-completed';
-        case 'in progress':
-          return 'status-in-progress';
-        case 'pending':
-          return 'status-pending';
-        default:
-          return 'status-unknown';
+        case 'completed': return 'status-completed';
+        case 'in progress': return 'status-in-progress';
+        case 'pending': return 'status-pending';
+        default: return 'status-unknown';
       }
     }
   },
   watch: {
     currentTab(newTab) {
-      if (newTab === 'users' && this.assignedUsers.length === 0) {
+      if (newTab === 'users' && !this.usersFetched) {
         this.fetchAssignedUsers();
       }
     }
@@ -130,7 +89,9 @@ export default {
       try {
         const res = await fetch(`${API_BASE_URL}/user-projects/project/${this.id}`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        this.assignedUsers = await res.json();
+        const data = await res.json();
+        this.assignedUsers = Array.isArray(data) ? data : [];
+        this.usersFetched = true;
       } catch (err) {
         console.error('Failed to fetch assigned users:', err);
         this.assignedUsers = [];
