@@ -4,7 +4,6 @@
       <div class="header">
         <h1>Assignment Permissions</h1>
       </div>
-
       <div class="actions">
         <router-link to="/create-permission" class="create-btn">Create New Permission</router-link>
       </div>
@@ -12,20 +11,24 @@
 
     <div class="bulk-actions" style="margin-bottom: 1.5rem;">
       <label for="role">Choose Role:</label>
-      <select v-model="selectedRoleId" id="role">
+      <select v-model="selectedRoleId" id="role" @change="onRoleChange">
         <option disabled value="">-- Select Role --</option>
         <option v-for="role in roles" :value="role.id" :key="role.id">
           {{ role.name }}
         </option>
       </select>
 
-      <button @click="assignPermissions" class="assign-confirm" :disabled="selectedPermissionIds.length === 0 || !selectedRoleId">
+      <button
+        @click="assignPermissions"
+        class="assign-confirm"
+        :disabled="selectedPermissionIds.length === 0 || !selectedRoleId"
+      >
         Assign Selected Permissions
       </button>
     </div>
 
     <div class="table-wrapper">
-      <table class="permissions-table">
+      <table class="permissions-table" v-if="permissions.length">
         <thead>
           <tr>
             <th>#</th>
@@ -52,8 +55,8 @@
         </tbody>
       </table>
 
-      <div v-if="permissions.length === 0" class="empty">
-        No permissions found.
+      <div v-else class="empty">
+        No unassigned permissions found for this role.
       </div>
     </div>
   </div>
@@ -62,17 +65,16 @@
 <script>
 const API_BASE_URL = process.env.VUE_APP_BASE_URL || 'http://localhost:8080';
 
-
 export default {
   name: 'AssignmentPermissions',
   data() {
     return {
-      permissions: [],
+      permissions: [], // initialized to empty array
       roles: [],
-      selectedRoleId: null,
+      selectedRoleId: '',
       selectedPermissionIds: [],
-      token: null,
-      currentUser: null,
+      token: '',
+      currentUser: null
     };
   },
   mounted() {
@@ -80,7 +82,7 @@ export default {
     try {
       const parsed = JSON.parse(rawToken);
       this.token = parsed.access_token;
-    } catch (e) {
+    } catch {
       this.token = rawToken;
     }
 
@@ -89,32 +91,43 @@ export default {
       this.currentUser = JSON.parse(userData);
     }
 
-    this.fetchPermissions();
     this.fetchRoles();
   },
   methods: {
-    async fetchPermissions() {
+    async fetchUnassignedPermissions(roleId) {
       try {
-        const res = await fetch(`${API_BASE_URL}/permissions`, {
+        const res = await fetch(`${API_BASE_URL}/permissions/unassigned/${roleId}`, {
           headers: {
-            Authorization: `Bearer ${this.token}`,
-          },
+            Authorization: `Bearer ${this.token}`
+          }
         });
-        this.permissions = await res.json();
+        if (!res.ok) throw new Error(`Error fetching permissions: ${res.status}`);
+        const data = await res.json();
+        this.permissions = Array.isArray(data) ? data : []; // always array
       } catch (err) {
-        console.error('Failed to fetch permissions:', err);
+        console.error('Failed to fetch unassigned permissions:', err);
+        this.permissions = [];
       }
     },
     async fetchRoles() {
       try {
         const res = await fetch(`${API_BASE_URL}/roles`, {
           headers: {
-            Authorization: `Bearer ${this.token}`,
-          },
+            Authorization: `Bearer ${this.token}`
+          }
         });
-        this.roles = await res.json();
+        const data = await res.json();
+        this.roles = Array.isArray(data) ? data : [];
       } catch (err) {
         console.error('Failed to fetch roles:', err);
+        this.roles = [];
+      }
+    },
+    onRoleChange() {
+      if (this.selectedRoleId) {
+        this.fetchUnassignedPermissions(this.selectedRoleId);
+      } else {
+        this.permissions = [];
       }
     },
     async assignPermissions() {
@@ -122,37 +135,31 @@ export default {
         alert('Please select a role');
         return;
       }
-      if (this.selectedPermissionIds.length === 0) {
+      if (!this.selectedPermissionIds.length) {
         alert('Please select at least one permission');
         return;
       }
 
       try {
-        const response = await fetch(
-          `${API_BASE_URL}/role-permissions/${this.selectedRoleId}`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${this.token}`,
-            },
-            body: JSON.stringify({
-              permission_ids: this.selectedPermissionIds,
-            }),
-          }
-        );
+        const res = await fetch(`${API_BASE_URL}/role-permissions/${this.selectedRoleId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${this.token}`
+          },
+          body: JSON.stringify({ permission_ids: this.selectedPermissionIds })
+        });
+        if (!res.ok) throw new Error('Assignment failed');
 
-        if (!response.ok) throw new Error('Assignment failed');
-        alert('Permissions assigned to role successfully');
-
+        alert('Permissions assigned successfully');
         this.selectedPermissionIds = [];
-        this.selectedRoleId = null;
+        this.fetchUnassignedPermissions(this.selectedRoleId);
       } catch (err) {
         console.error('Error assigning permissions:', err);
         alert('Failed to assign permissions');
       }
-    },
-  },
+    }
+  }
 };
 </script>
 
