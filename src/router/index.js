@@ -21,6 +21,7 @@ import AddUser from '@/pages/AddUser.vue';
 import AssignUsersToTask from '@/pages/AssignUsersToTask.vue';
 import CreatePermission from '@/pages/CreatePermission.vue';
 import AssignUsersToProject from '@/pages/AssignUsersToProject.vue';
+import AlertsPage from '@/pages/AlertsPage.vue';
 
 const routes = [
   {
@@ -39,6 +40,12 @@ const routes = [
         name: 'dashboard', 
         component: DashboardPage,
         meta: { requiresAuth: true  }
+      },
+      {
+        path: '/alerts',
+        name: 'alerts',
+        component: AlertsPage,
+        meta: { requiresAuth: true }
       },
       { 
         path: 'team', 

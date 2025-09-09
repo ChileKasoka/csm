@@ -131,23 +131,28 @@ onMounted(() => {
 }
 
 /* Sidebar */
+/* Sidebar */
 .sidebar {
   width: 250px;
-  background-color: #676767;
+  background-color: #363636;
   padding: 2rem 1rem;
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
-  transition: transform 0.3s ease;
+  transition: width 0.5s cubic-bezier(0.25, 1, 0.5, 1), 
+              opacity 0.4s ease;
   display: flex;
   flex-direction: column;
   overflow-y: auto;
+  white-space: nowrap;
+  opacity: 1;
 }
 
 .sidebar.collapsed {
-  transform: translateX(-100%);
-  position: absolute;
-  z-index: 999;
-  height: 100%;
+  width: 0;
+  padding: 2rem 0;
+  overflow: hidden;
+  opacity: 0.5; /* faint ghost before disappearing */
 }
+
 
 /* Sidebar Content */
 .logo {
@@ -198,7 +203,13 @@ onMounted(() => {
   padding: 2rem;
   overflow-y: auto;
   background-color: rgb(230, 230, 230);
+  transition: margin-left 0.5s cubic-bezier(0.25, 1, 0.5, 1);
 }
+
+.sidebar.collapsed ~ .main-content {
+  margin-left: 0;
+}
+
 
 .header h1 {
   font-size: 2rem;
@@ -281,7 +292,7 @@ details[open] summary {
 
 .navbar {
   height: 60px;
-  background: #676767;
+  background: #363636;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   display: flex;
   align-items: center;
