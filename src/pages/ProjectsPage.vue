@@ -60,55 +60,96 @@ import { hasPermission } from '@/utils/permissions';
 
 const API_BASE_URL = process.env.VUE_APP_BASE_URL || 'http://localhost:8080';
 
-
 export default {
   name: 'ProjectsPage',
   data() {
     return {
       projects: [],
       isLoading: true,
+      currentUserId: null
     };
   },
-  mounted() {
-    this.fetchProjects();
-  },
+mounted() {
+  const storedUser = localStorage.getItem('user');
+  if (storedUser) {
+    try {
+      const userObj = JSON.parse(storedUser);
+      this.currentUserId = userObj.id;
+      this.userName = userObj.name || '';
+      this.userId = userObj.id;
+
+      // Handle both role.name and role as plain string
+      this.role = (userObj.role?.name || userObj.role || '').toLowerCase();
+
+      console.log('User:', this.userName, '| Role:', this.role);
+
+      if (this.userName.toLowerCase() === 'admin' || this.role === 'admin') {
+        console.log('Fetching all projects...');
+        this.fetchProjects();
+      } else {
+        console.log('Fetching assigned projects for user ID:', this.userId);
+        this.fetchAssignedProjects(this.userId);
+      }
+    } catch (err) {
+      console.error('Error parsing user from localStorage:', err);
+      this.isLoading = false;
+    }
+  }
+},
   computed: {
     canCreateProject() {
       return hasPermission('Create Project');
     },
-
     canEditProject() {
       return hasPermission('Update Project');
     },
-
     canDeleteProject() {
       return hasPermission('Delete Project');
     }
   },
   methods: {
-async fetchProjects() {
-  this.isLoading = true;
 
-  const startTime = Date.now();
+    async fetchProjects() {
+      this.isLoading = true;
 
-  try {
-    const res = await fetch(`${API_BASE_URL}/projects`);
-    const data = await res.json();
-    this.projects = Array.isArray(data) ? data : [];
-  } catch (err) {
-    console.error('Error fetching projects:', err);
-    this.projects = [];
-  } finally {
-    // Ensure at least 500ms loading time
-    const elapsed = Date.now() - startTime;
-    const delay = Math.max(0, 500 - elapsed);
-    setTimeout(() => {
-      this.isLoading = false;
-    }, delay);
-  }
-}
+      const startTime = Date.now();
 
-,
+      try {
+        const res = await fetch(`${API_BASE_URL}/projects`);
+        const data = await res.json();
+        this.projects = Array.isArray(data) ? data : [];
+      } catch (err) {
+        console.error('Error fetching projects:', err);
+        this.projects = [];
+      } finally {
+        // Ensure at least 500ms loading time
+        const elapsed = Date.now() - startTime;
+        const delay = Math.max(0, 500 - elapsed);
+        setTimeout(() => {
+          this.isLoading = false;
+        }, delay);
+      }
+    },
+
+    async fetchAssignedProjects(userId) {
+      this.isLoading = true;
+      const startTime = Date.now();
+
+      try {
+        const res = await fetch(`${API_BASE_URL}/user-projects/${userId}/projects`);
+        const data = await res.json();
+        this.projects = Array.isArray(data) ? data : [];
+      } catch (err) {
+        console.error('Error fetching projects:', err);
+        this.projects = [];
+      } finally {
+        const elapsed = Date.now() - startTime;
+        const delay = Math.max(0, 500 - elapsed);
+        setTimeout(() => {
+          this.isLoading = false;
+        }, delay);
+      }
+    },
     formatDate(dateStr) {
       if (!dateStr || dateStr.startsWith('0001')) return '—';
       const date = new Date(dateStr);
@@ -122,10 +163,10 @@ async fetchProjects() {
     },
     async deleteProject(id) {
       if (confirm('Are you sure you want to delete this project?')) {
-        await fetch(`${API_BASE_URL}/projects/${id}`, {
-          method: 'DELETE'
-        });
-        this.fetchProjects();
+        await fetch(`${API_BASE_URL}/projects/${id}`, { method: 'DELETE' });
+        if (this.currentUserId) {
+          this.fetchAssignedProjects(this.currentUserId);
+        }
       }
     },
     editProject(project) {

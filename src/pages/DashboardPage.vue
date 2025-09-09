@@ -74,12 +74,63 @@ export default {
       const userObj = JSON.parse(storedUser);
       this.userName = userObj.name || '';
       this.userId = userObj.id;
+      this.role = (userObj.role?.name || userObj.role || '').toLowerCase();
       this.fetchAssignedTasks();
     }
 
+  if (storedUser) {
+    try {
+      const userObj = JSON.parse(storedUser);
+      this.currentUserId = userObj.id;
+      this.userName = userObj.name || '';
+      this.userId = userObj.id;
+
+      // Handle both role.name and role as plain string
+      this.role = (userObj.role?.name || userObj.role || '').toLowerCase();
+
+      console.log('User:', this.userName, '| Role:', this.role);
+
+      if (this.role === 'admin') {
+        console.log('Fetching all projects...');
+        this.fetchProjectsCount();
+      } else {
+        console.log('Fetching assigned projects count for user ID:', this.userId);
+        this.fetchUserProjectsCountByUserId(this.userId);
+      }
+    } catch (err) {
+      console.error('Error parsing user from localStorage:', err);
+      this.isLoading = false;
+    }
+  }
+
+  if (storedUser) {
+    try {
+      const userObj = JSON.parse(storedUser);
+      this.currentUserId = userObj.id;
+      this.userName = userObj.name || '';
+      this.userId = userObj.id;
+
+      // Handle both role.name and role as plain string
+      this.role = (userObj.role?.name || userObj.role || '').toLowerCase();
+
+      console.log('User:', this.userName, '| Role:', this.role);
+
+      if (this.role === 'admin') {
+        console.log('Fetching all assignment count...');
+        this.fetchTasksCount();
+      } else {
+        console.log('Fetching assigned assignment count for user ID:', this.userId);
+        this.fetchAssignedTasksCount(this.userId);
+      }
+    } catch (err) {
+      console.error('Error parsing user from localStorage:', err);
+      this.isLoading = false;
+    }
+  }
+
     this.fetchTeamCount();
-    this.fetchProjectsCount();
-    this.fetchTasksCount();
+    // this.fetchUserProjectsCountByUserId(this.userId);
+    // this.fetchTasksCount();
   },
 
   methods: {
@@ -111,6 +162,20 @@ export default {
       }
     },
 
+    async fetchUserProjectsCountByUserId(userId) {
+      try {
+        const response = await fetch(`${API_BASE_URL}/user-projects/${userId}/count`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+          }
+        });
+        const data = await response.json();
+        this.projectsCount = data.count;
+      } catch (error) {
+        console.error('Error fetching user projects count:', error);
+      }
+    },
+
     async fetchTasksCount() {
       try {
         const response = await fetch(`${API_BASE_URL}/tasks/count`, {
@@ -122,6 +187,22 @@ export default {
         this.tasksCount = data.count;
       } catch (error) {
         console.error('Error fetching tasks count:', error);
+      }
+    },
+
+    async fetchAssignedTasksCount() {
+      if (!this.userId) return;
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/user-tasks/${this.userId}/count`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+          }
+        });
+        const data = await response.json();
+        this.tasksCount = data.count;
+      } catch (error) {
+        console.error('Error fetching assigned tasks count:', error);
       }
     },
 

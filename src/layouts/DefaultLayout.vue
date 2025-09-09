@@ -18,19 +18,10 @@
 
   <nav class="nav-links">
     <router-link to="/dashboard">📉 Dashboard</router-link>
-    <!-- <br>
-    <router-link to="/alerts">🔔 Alerts</router-link> -->
-    <details class="dropdown">
-      <summary class="summary-with-toggle-arrow">
-        👷🏿 Resources
-      </summary>
-      <hr>
-      <div class="submenu">
+    <router-link to="/alerts">🔔 Alerts</router-link>
         <router-link to="/team">👥 Team</router-link>
         <router-link to="/projects">🚧 Projects</router-link>
         <router-link to="/tasks">📝 Assignments</router-link>
-      </div>
-    </details>
 
     <details>
       <summary class="summary-with-toggle-arrow">⚙️ Settings</summary>

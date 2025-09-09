@@ -60,7 +60,7 @@ export default {
         const data = await response.json();
 
         localStorage.setItem("access_token", data.access_token);
-        localStorage.setItem("user", JSON.stringify({ id: data.user.id, name: data.user.name }));
+        localStorage.setItem("user", JSON.stringify({ id: data.user.id, name: data.user.name, role: data.user.role?.name || data.user.role || '' }));
         localStorage.setItem("permissions", JSON.stringify(data.permissions));
 
         // Optional: redirect or update UI here
